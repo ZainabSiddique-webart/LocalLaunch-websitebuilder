@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LocalLaunch — Build Your Website</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=Bebas+Neue&family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600;700&family=Josefin+Sans:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#0D0B18;--ink2:#1C1929;--ink3:#2D2A3E;
+  --purple:#7C3AED;--lav:#A78BFA;--light:#C4B5FD;
+  --gold:#D4AF6A;--gold2:#F5D58A;
+  --bg:#FAF9FF;--border:#EDE9FE;--white:#FFFFFF;
+  --card:#F5F3FF;--mid:#6B7280;
+  --grad:linear-gradient(135deg,#A78BFA,#7C3AED);
+  --grad-gold:linear-gradient(135deg,#D4AF6A,#F5D58A);
+  --success:#10B981;--error:#EF4444;
+  --r:16px;
+}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);overflow:hidden}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--lav);border-radius:10px}
+
+/* ═══ TOPBAR ═══════════════════════════════════════════════ */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  height:54px;padding:0 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(13,11,24,.95);backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(167,139,250,.15);
+}
+.tb-logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.tb-logo-gem{
+  width:28px;height:28px;border-radius:8px;
+  background:var(--grad);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 14px rgba(124,58,237,.4);
+}
+.tb-logo-gem svg{width:14px;height:14px;fill:white}
+.tb-logo-text{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--lav);letter-spacing:.02em}
+.tb-center{display:flex;align-items:center;gap:20px}
+.tb-step-pill{
+  background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);
+  border-radius:100px;padding:4px 14px;
+  font-size:11px;font-weight:600;color:var(--lav);letter-spacing:.06em;
+}
+.tb-right{display:flex;align-items:center;gap:8px}
+.tb-exit{
+  display:flex;align-items:center;gap:5px;
+  font-size:12px;font-weight:600;color:rgba(255,255,255,.4);
+  text-decoration:none;padding:6px 12px;border-radius:8px;
+  transition:all .2s;
+}
+.tb-exit:hover{color:var(--error);background:rgba(239,68,68,.1)}
+.tb-exit svg{width:13px;height:13px;fill:currentColor}
+
+/* ═══ APP SHELL ══════════════════════════════════════════ */
+.app{
+  position:fixed;
+  top:54px;left:0;right:0;bottom:0;
+  display:flex;
+}
+
+/* ═══ LEFT PANEL ═════════════════════════════════════════ */
+.left{
+  width:45%;background:var(--ink2);
+  border-right:1px solid rgba(167,139,250,.12);
+  display:flex;flex-direction:column;
+  overflow:hidden;position:relative;
+}
+/* subtle background texture */
+.left::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 20% 20%, rgba(124,58,237,.08) 0%, transparent 60%),
+             radial-gradient(ellipse at 80% 80%, rgba(167,139,250,.05) 0%, transparent 60%);
+  pointer-events:none;
+}
+
+/* Progress */
+.prog-wrap{padding:20px 28px 16px;border-bottom:1px solid rgba(167,139,250,.1);position:relative;z-index:1}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.prog-steps{display:flex;gap:3px;align-items:center}
+.ps{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.12);transition:all .3s}
+.ps.done{background:var(--lav)}
+.ps.cur{background:var(--gold);width:18px;border-radius:3px}
+.prog-pct{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.06em}
+.prog-track{height:3px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden}
+.prog-fill{height:100%;background:var(--grad-gold);border-radius:100px;transition:width .5s cubic-bezier(.25,.46,.45,.94)}
+.prog-lbl{font-size:11px;color:rgba(255,255,255,.35);margin-top:7px;font-weight:400;letter-spacing:.02em}
+
+/* Q Area */
+.q-area{flex:1;min-height:0;padding:20px 28px 20px;overflow-y:auto;display:flex;flex-direction:column;justify-content:flex-start;position:relative;z-index:1;}
+.q-slide{animation:qin .3s cubic-bezier(.25,.46,.45,.94) both}
+@keyframes qin{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.q-eyebrow{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.q-eyebrow-line{width:18px;height:1.5px;background:var(--gold)}
+.q-eyebrow-text{font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.14em;text-transform:uppercase}
+.q-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:white;line-height:1.25;margin-bottom:7px}
+.q-hint{font-size:12px;color:rgba(255,255,255,.35);margin-bottom:20px;line-height:1.6;display:flex;align-items:flex-start;gap:6px}
+.q-hint svg{width:12px;height:12px;fill:rgba(167,139,250,.6);margin-top:1px;flex-shrink:0}
+
+/* Inputs */
+.inp-wrap{position:relative}
+.inp-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:15px;height:15px;fill:rgba(255,255,255,.25);pointer-events:none}
+.inp{
+  width:100%;padding:13px 16px 13px 42px;
+  background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);
+  border-radius:12px;font-family:'DM Sans',sans-serif;font-size:13px;
+  color:white;outline:none;transition:all .25s;
+}
+.inp.no-ico{padding-left:16px}
+.inp:focus{border-color:var(--lav);background:rgba(167,139,250,.08);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.inp::placeholder{color:rgba(255,255,255,.2)}
+textarea.inp{resize:none;height:100px;line-height:1.65;padding-top:13px}
+select.inp{cursor:pointer;appearance:none;-webkit-appearance:none}
+.sel-arr{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:14px;height:14px;fill:rgba(255,255,255,.3);pointer-events:none}
+.cc{font-size:10px;color:rgba(255,255,255,.25);text-align:right;margin-top:5px}
+
+/* Two column inputs */
+.inp-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* ── TEMPLATE GRID ── */
+.tpl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.tpl-card{
+  border:1.5px solid rgba(255,255,255,.08);border-radius:14px;
+  padding:0;cursor:pointer;transition:all .25s;
+  background:rgba(255,255,255,.04);overflow:hidden;position:relative;
+}
+.tpl-card:hover{border-color:rgba(167,139,250,.4);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.tpl-card.sel{border-color:var(--gold);box-shadow:0 0 0 2px rgba(212,175,106,.2)}
+.tpl-prev{height:56px;display:flex;align-items:flex-end;padding:6px 8px;position:relative;overflow:hidden}
+.tpl-prev-bar{height:6px;border-radius:2px;opacity:.7}
+.tpl-prev-lines{display:flex;flex-direction:column;gap:3px;flex:1}
+.tpl-prev-line{height:3px;border-radius:2px;opacity:.4}
+.tpl-info{padding:8px 11px}
+.tpl-name{font-size:11px;font-weight:700;color:white}
+.tpl-desc{font-size:9px;color:rgba(255,255,255,.35);margin-top:1px}
+.tpl-chk{
+  position:absolute;top:7px;right:7px;width:16px;height:16px;
+  border-radius:50%;background:var(--gold);
+  display:none;align-items:center;justify-content:center;
+}
+.tpl-card.sel .tpl-chk{display:flex}
+.tpl-chk svg{width:9px;height:9px;fill:white}
+
+/* ── PALETTE GRID ── */
+.pal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pal-card{
+  border:1.5px solid rgba(255,255,255,.08);border-radius:12px;
+  padding:14px 10px;cursor:pointer;transition:all .25s;
+  background:rgba(255,255,255,.04);text-align:center;position:relative;
+}
+.pal-card:hover{border-color:rgba(167,139,250,.4);transform:translateY(-2px)}
+.pal-card.sel{border-color:var(--gold);box-shadow:0 0 0 2px rgba(212,175,106,.2)}
+.pal-swatches{display:flex;justify-content:center;gap:4px;margin-bottom:8px}
+.pal-sw{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.15)}
+.pal-name{font-size:10px;font-weight:700;color:white}
+.pal-mood{font-size:9px;color:rgba(255,255,255,.3);margin-top:2px}
+.pal-chk{
+  position:absolute;top:7px;right:7px;width:15px;height:15px;
+  border-radius:50%;background:var(--gold);
+  display:none;align-items:center;justify-content:center;
+}
+.pal-card.sel .pal-chk{display:flex}
+.pal-chk svg{width:8px;height:8px;fill:white}
+
+/* ── HERO STYLE ── */
+.hero-grid{display:flex;flex-direction:column;gap:7px}
+.hero-card{
+  border:1.5px solid rgba(255,255,255,.08);border-radius:12px;
+  padding:12px 14px;cursor:pointer;transition:all .25s;
+  background:rgba(255,255,255,.04);
+  display:flex;align-items:center;gap:14px;position:relative;
+}
+.hero-card:hover{border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.05)}
+.hero-card.sel{border-color:var(--gold);background:rgba(212,175,106,.06)}
+.hero-thumb{
+  width:52px;height:36px;border-radius:7px;flex-shrink:0;
+  overflow:hidden;display:flex;flex-direction:column;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+}
+.hero-thumb-bar{height:4px;width:100%}
+.hero-thumb-body{flex:1;padding:4px 5px;display:flex;flex-direction:column;gap:3px}
+.hero-thumb-h{border-radius:1px;opacity:.7}
+.hero-thumb-p{border-radius:1px;opacity:.3}
+.hero-thumb-btn{width:20px;height:5px;border-radius:2px;opacity:.6;margin-top:2px}
+.hero-meta .hero-name{font-size:12px;font-weight:700;color:white}
+.hero-meta .hero-sub{font-size:10px;color:rgba(255,255,255,.35);margin-top:2px}
+.hero-radio{
+  position:absolute;right:14px;width:18px;height:18px;
+  border-radius:50%;border:1.5px solid rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;background:transparent;
+}
+.hero-card.sel .hero-radio{border-color:var(--gold);background:var(--gold)}
+.hero-radio svg{width:9px;height:9px;fill:white;opacity:0;transition:opacity .2s}
+.hero-card.sel .hero-radio svg{opacity:1}
+
+/* ── FONT CARDS ── */
+.font-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.font-card{
+  border:1.5px solid rgba(255,255,255,.08);border-radius:12px;
+  padding:14px;cursor:pointer;transition:all .25s;
+  background:rgba(255,255,255,.04);position:relative;
+}
+.font-card:hover{border-color:rgba(167,139,250,.4);transform:translateY(-2px)}
+.font-card.sel{border-color:var(--gold);box-shadow:0 0 0 2px rgba(212,175,106,.2)}
+.font-sample-h{font-size:17px;font-weight:600;color:white;margin-bottom:4px;line-height:1.2}
+.font-sample-b{font-size:9px;color:rgba(255,255,255,.35);line-height:1.5}
+.font-pair-name{font-size:10px;font-weight:700;color:var(--lav);margin-top:7px;letter-spacing:.04em}
+.font-chk{
+  position:absolute;top:9px;right:9px;width:16px;height:16px;
+  border-radius:50%;background:var(--gold);
+  display:none;align-items:center;justify-content:center;
+}
+.font-card.sel .font-chk{display:flex}
+.font-chk svg{width:9px;height:9px;fill:white}
+
+/* ── TONE CARDS ── */
+.tone-grid{display:flex;flex-direction:column;gap:7px}
+.tone-card{
+  border:1.5px solid rgba(255,255,255,.08);border-radius:12px;
+  padding:13px 15px;cursor:pointer;transition:all .25s;
+  display:flex;align-items:center;gap:12px;
+  background:rgba(255,255,255,.04);position:relative;
+}
+.tone-card:hover{border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.05)}
+.tone-card.sel{border-color:var(--gold);background:rgba(212,175,106,.06)}
+.tone-icon-wrap{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.tone-name{font-size:12px;font-weight:700;color:white}
+.tone-sub{font-size:10px;color:rgba(255,255,255,.35);margin-top:2px}
+.tone-radio{
+  position:absolute;right:14px;width:18px;height:18px;border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;transition:all .2s;
+}
+.tone-card.sel .tone-radio{border-color:var(--gold);background:var(--gold)}
+.tone-radio svg{width:9px;height:9px;fill:white;opacity:0;transition:opacity .2s}
+.tone-card.sel .tone-radio svg{opacity:1}
+
+/* ── ANIMATION ── */
+.anim-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.anim-card{
+  border:1.5px solid rgba(255,255,255,.08);border-radius:12px;
+  padding:14px;cursor:pointer;transition:all .25s;
+  background:rgba(255,255,255,.04);text-align:center;position:relative;
+}
+.anim-card:hover{border-color:rgba(167,139,250,.4);transform:translateY(-2px)}
+.anim-card.sel{border-color:var(--gold);background:rgba(212,175,106,.06)}
+.anim-icon{font-size:24px;margin-bottom:8px}
+.anim-name{font-size:11px;font-weight:700;color:white}
+.anim-sub{font-size:9px;color:rgba(255,255,255,.3);margin-top:2px}
+.anim-chk{
+  position:absolute;top:8px;right:8px;width:15px;height:15px;
+  border-radius:50%;background:var(--gold);
+  display:none;align-items:center;justify-content:center;
+}
+.anim-card.sel .anim-chk{display:flex}
+.anim-chk svg{width:8px;height:8px;fill:white}
+
+/* ── LOGO UPLOAD ── */
+.logo-upload-zone{
+  border:2px dashed rgba(255,255,255,.12);border-radius:16px;
+  padding:28px;text-align:center;cursor:pointer;transition:all .25s;
+  background:rgba(255,255,255,.03);position:relative;
+}
+.logo-upload-zone:hover{border-color:var(--lav);background:rgba(167,139,250,.06)}
+.logo-upload-zone.has-logo{border-color:var(--success);border-style:solid;background:rgba(16,185,129,.05)}
+.lu-icon{width:42px;height:42px;border-radius:12px;background:rgba(212,175,106,.1);margin:0 auto 12px;display:flex;align-items:center;justify-content:center}
+.lu-icon svg{width:20px;height:20px;fill:var(--gold)}
+.lu-title{font-size:13px;font-weight:700;color:white;margin-bottom:4px}
+.lu-sub{font-size:11px;color:rgba(255,255,255,.3)}
+.lu-input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.logo-preview-wrap{margin-top:14px;display:none;flex-direction:column;align-items:center;gap:8px}
+.logo-preview-img{max-width:100px;max-height:60px;object-fit:contain;border-radius:8px}
+.logo-preview-name{font-size:10px;color:rgba(255,255,255,.35)}
+.logo-remove{font-size:10px;font-weight:600;color:var(--error);cursor:pointer;background:none;border:none;padding:2px 8px;border-radius:100px;transition:background .2s}
+.logo-remove:hover{background:rgba(239,68,68,.1)}
+.logo-skip{margin-top:12px;font-size:11px;color:rgba(255,255,255,.25);text-align:center}
+.logo-skip a{color:var(--lav);text-decoration:none;font-weight:600;cursor:pointer}
+
+/* ── REFERRAL ── */
+.ref-box{
+  background:rgba(212,175,106,.06);border:1.5px solid rgba(212,175,106,.2);
+  border-radius:16px;padding:20px;
+}
+.ref-title{font-size:14px;font-weight:700;color:var(--gold);margin-bottom:5px;display:flex;align-items:center;gap:7px}
+.ref-sub{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:16px;line-height:1.6}
+.ref-inputs{display:flex;flex-direction:column;gap:8px}
+.ref-status{
+  margin-top:12px;padding:10px 14px;border-radius:10px;
+  font-size:11px;font-weight:600;text-align:center;display:none;
+}
+.ref-status.ok{background:rgba(16,185,129,.1);color:#10B981;border:1px solid rgba(16,185,129,.2)}
+.ref-status.pending{background:rgba(212,175,106,.1);color:var(--gold);border:1px solid rgba(212,175,106,.2)}
+.no-ref-option{
+  margin-top:12px;text-align:center;
+  font-size:11px;color:rgba(255,255,255,.25);
+}
+.no-ref-option a{color:var(--lav);font-weight:600;cursor:pointer;text-decoration:none}
+
+/* ── NAV BUTTONS ── */
+.nav-btns{
+  padding:14px 28px;border-top:1px solid rgba(255,255,255,.06);
+  display:flex;gap:10px;align-items:center;z-index:10;
+  background:var(--ink2);
+  flex-shrink:0;
+}
+.btn-back{
+  flex:1;padding:11px;border:1.5px solid rgba(255,255,255,.1);
+  border-radius:100px;background:transparent;
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+  color:rgba(255,255,255,.4);cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.btn-back:hover{border-color:rgba(255,255,255,.25);color:rgba(255,255,255,.7)}
+.btn-back svg{width:13px;height:13px;fill:currentColor}
+.btn-next{
+  flex:2;padding:11px;border:none;border-radius:100px;
+  background:var(--grad-gold);color:var(--ink);
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .25s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  letter-spacing:.03em;
+}
+.btn-next:hover{transform:scale(1.02);box-shadow:0 10px 32px rgba(212,175,106,.35)}
+.btn-next:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.step-dots{display:flex;gap:4px;justify-content:center;padding:6px 0;z-index:10;background:var(--ink2);flex-shrink:0;}
+.sdot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.1);cursor:pointer;transition:all .2s}
+.sdot.done{background:rgba(167,139,250,.5)}
+.sdot.active{background:var(--gold);width:14px;border-radius:2px}
+
+/* ═══ RIGHT PANEL ════════════════════════════════════════ */
+.right{width:55%;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;position:relative;}
+
+.prev-topbar{
+  padding:12px 22px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);background:white;
+}
+.prev-label{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:700;color:var(--lav);letter-spacing:.1em;text-transform:uppercase}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--success);animation:blink 1.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.prev-hint{font-size:11px;color:var(--mid)}
+
+.prev-scroll{flex:1;overflow-y:auto;padding:18px}
+
+/* Empty state */
+.empty{
+  height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:40px;
+}
+.empty-orb{width:80px;height:80px;border-radius:24px;background:var(--card);margin:0 auto 20px;display:flex;align-items:center;justify-content:center}
+.empty-orb svg{width:38px;height:38px;fill:var(--light)}
+.empty-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--ink);margin-bottom:8px}
+.empty-sub{font-size:13px;color:var(--mid);line-height:1.65;max-width:240px}
+
+/* Browser chrome */
+.prev-browser{display:none}
+.pb-chrome{
+  background:var(--ink);border-radius:10px 10px 0 0;
+  padding:8px 14px;display:flex;align-items:center;gap:5px;
+}
+.pb-dot{width:7px;height:7px;border-radius:50%}
+.pb-url{
+  flex:1;background:rgba(255,255,255,.07);border-radius:5px;
+  padding:4px 10px;margin-left:6px;display:flex;align-items:center;gap:5px;
+}
+.pb-lock svg{width:8px;height:8px;fill:#6EE7B7}
+.pb-urltext{font-size:9px;color:rgba(255,255,255,.4)}
+.pb-body{background:white;border-radius:0 0 10px 10px;overflow:hidden;border:1px solid var(--border);border-top:none}
+
+/* Mini site */
+.ms-nav{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--border)}
+.ms-logo-area{display:flex;align-items:center;gap:7px}
+.ms-logo-img{max-height:22px;max-width:80px;object-fit:contain;display:none}
+.ms-logo-text{font-size:11px;font-weight:700;color:var(--purple);transition:all .4s}
+.ms-nav-links{display:flex;gap:10px}
+.ms-nav-link{font-size:8px;color:var(--mid)}
+.ms-nav-cta{font-size:8px;font-weight:700;color:white;background:var(--purple);padding:3px 9px;border-radius:100px;transition:background .4s}
+.ms-hero{padding:24px 18px;position:relative;overflow:hidden;transition:background .5s;min-height:90px}
+.ms-hero-orb{position:absolute;width:100px;height:100px;border-radius:50%;filter:blur(35px);opacity:.25;top:-25px;right:-25px;transition:background .5s}
+.ms-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  border-radius:100px;padding:3px 9px;margin-bottom:8px;transition:all .4s;
+}
+.ms-biz-name{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:4px;min-height:22px;transition:all .3s;line-height:1.2}
+.ms-tagline{font-size:10px;color:var(--mid);margin-bottom:12px;min-height:14px;font-style:italic;transition:color .4s}
+.ms-cta-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:5px 13px;border-radius:100px;font-size:9px;font-weight:700;
+  color:white;background:var(--purple);transition:background .4s;
+}
+.ms-services{padding:12px 18px;border-top:1px solid var(--border);display:none}
+.ms-sec-lbl{font-size:8px;font-weight:700;color:var(--mid);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}
+.ms-svc-grid{display:flex;flex-wrap:wrap;gap:5px}
+.ms-svc-chip{
+  padding:4px 9px;border-radius:6px;font-size:8px;font-weight:700;
+  border:1px solid;transition:all .4s;
+  animation:chip-pop .3s ease both;
+}
+@keyframes chip-pop{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+.ms-contact-sec{padding:12px 18px;border-top:1px solid var(--border);display:none}
+.ms-contact-item{display:flex;align-items:center;gap:5px;font-size:8px;color:var(--mid);margin-bottom:4px}
+.ms-contact-item svg{width:8px;height:8px;fill:var(--lav);flex-shrink:0}
+.ms-footer{padding:8px 18px;display:none;align-items:center;justify-content:space-between}
+.ms-footer-logo{font-size:9px;font-weight:700;color:white}
+.ms-footer-badge{font-size:7px;color:rgba(255,255,255,.35)}
+.ms-footer-badge.hidden{display:none!important}
+
+/* AI generating */
+.ai-gen{padding:16px;border-top:1px solid var(--border);display:none;flex-direction:column;align-items:center;gap:8px}
+.ai-spin-wrap{position:relative;width:36px;height:36px}
+.ai-spin{width:36px;height:36px;border:2px solid var(--border);border-top-color:var(--lav);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-spin-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.ai-spin-icon svg{width:14px;height:14px;fill:var(--purple)}
+.ai-gen-text{font-size:11px;font-weight:700;color:var(--lav)}
+.ai-gen-sub{font-size:10px;color:var(--mid)}
+
+/* SUCCESS */
+.success-scr{
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:36px 28px;text-align:center;height:100%;
+  background:linear-gradient(160deg,#EDE9FE,#FAF8FF);
+}
+.success-icon-w{
+  width:72px;height:72px;border-radius:22px;
+  background:var(--grad);margin:0 auto 20px;
+  display:flex;align-items:center;justify-content:center;
+  animation:sbounce .6s ease;box-shadow:0 18px 48px rgba(124,58,237,.3);
+}
+@keyframes sbounce{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.success-icon-w svg{width:36px;height:36px;fill:white}
+.success-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--ink);margin-bottom:8px}
+.success-sub{font-size:13px;color:var(--mid);margin-bottom:20px;line-height:1.65;max-width:260px}
+.success-link-box{
+  background:white;border:1.5px solid var(--border);border-radius:12px;
+  padding:10px 16px;font-size:11px;color:var(--purple);font-weight:600;
+  margin-bottom:18px;word-break:break-all;width:100%;text-align:left;
+}
+.slb-label{font-size:9px;font-weight:700;color:var(--mid);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.success-btns{display:flex;flex-direction:column;gap:8px;width:100%}
+.sbtn-p{
+  padding:12px;border-radius:100px;background:var(--grad);
+  color:white;border:none;font-family:'DM Sans',sans-serif;
+  font-size:13px;font-weight:700;cursor:pointer;transition:all .25s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.sbtn-p:hover{transform:scale(1.03);box-shadow:0 12px 36px rgba(124,58,237,.3)}
+.sbtn-s{
+  padding:11px;border-radius:100px;background:white;
+  color:var(--purple);border:1.5px solid var(--border);
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.sbtn-s:hover{border-color:var(--lav)}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  html,body{overflow:auto}
+  .app{position:relative;top:auto;left:auto;right:auto;bottom:auto;flex-direction:column;height:auto;margin-top:54px;}
+  .left{width:100%;height:auto;overflow:visible;}
+  .right{width:100%;height:420px;overflow:hidden;}
+  .tpl-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a class="tb-logo" href="Index.html">
+    <div class="tb-logo-gem">
+      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+    </div>
+    <span class="tb-logo-text">LocalLaunch</span>
+  </a>
+  <div class="tb-center">
+    <div class="tb-step-pill" id="step-counter">Step 1 of 13</div>
+  </div>
+  <div class="tb-right" id="q-tb-right">
+    <a class="tb-exit" href="Index.html">
+      <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      Exit
+    </a>
+  </div>
+</div>
+
+<div class="app">
+  <!-- LEFT PANEL -->
+  <div class="left">
+    <div class="prog-wrap">
+      <div class="prog-top">
+        <div class="prog-steps" id="prog-steps"></div>
+        <div class="prog-pct" id="prog-pct">8%</div>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:8%"></div></div>
+      <div class="prog-lbl" id="prog-lbl">Getting started — tell us about your business</div>
+    </div>
+    <div class="q-area" id="q-area"></div>
+    <div class="nav-btns">
+      <button class="btn-back" id="btn-back" onclick="prevStep()">
+        <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        Back
+      </button>
+      <button class="btn-next" id="btn-next" onclick="nextStep()">
+        Continue
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+      </button>
+    </div>
+    <div class="step-dots" id="step-dots"></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right">
+    <div class="prev-topbar">
+      <div class="prev-label"><div class="live-dot"></div> Live Preview</div>
+      <div class="prev-hint">Updates as you answer ✦</div>
+    </div>
+    <div class="prev-scroll" id="prev-scroll">
+
+      <!-- Empty state -->
+      <div class="empty" id="empty-state">
+        <div class="empty-orb">
+          <svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM5 10h9v2H5zm0-3h9v2H5zm0 6h5v2H5z"/></svg>
+        </div>
+        <div class="empty-title">Your website lives here</div>
+        <div class="empty-sub">Answer the questions and watch your site build itself — section by section, live.</div>
+      </div>
+
+      <!-- Browser preview -->
+      <div class="prev-browser" id="prev-browser">
+        <div class="pb-chrome">
+          <div class="pb-dot" style="background:#FF5F56"></div>
+          <div class="pb-dot" style="background:#FFBD2E"></div>
+          <div class="pb-dot" style="background:#27C93F"></div>
+          <div class="pb-url">
+            <div class="pb-lock"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z"/></svg></div>
+            <span class="pb-urltext" id="pb-url">locallaunch.app/site/your-business</span>
+          </div>
+        </div>
+        <div class="pb-body">
+          <!-- Nav -->
+          <div class="ms-nav">
+            <div class="ms-logo-area">
+              <img class="ms-logo-img" id="ms-logo-img" src="" alt="Logo"/>
+              <div class="ms-logo-text" id="ms-logo-text">Your Business</div>
+            </div>
+            <div class="ms-nav-links">
+              <span class="ms-nav-link">Services</span>
+              <span class="ms-nav-link">About</span>
+              <span class="ms-nav-link">Contact</span>
+            </div>
+            <div class="ms-nav-cta" id="ms-nav-cta">Book Now</div>
+          </div>
+          <!-- Hero -->
+          <div class="ms-hero" id="ms-hero">
+            <div class="ms-hero-orb" id="ms-orb"></div>
+            <div class="ms-badge" id="ms-badge">✨ Welcome</div>
+            <div class="ms-biz-name" id="ms-biz-name">Your Business Name</div>
+            <div class="ms-tagline" id="ms-tagline">Your AI-generated tagline will appear here...</div>
+            <div class="ms-cta-btn" id="ms-cta-btn">Book Now →</div>
+          </div>
+          <!-- Services -->
+          <div class="ms-services" id="ms-services">
+            <div class="ms-sec-lbl">Our Services</div>
+            <div class="ms-svc-grid" id="ms-svc-grid"></div>
+          </div>
+          <!-- Contact -->
+          <div class="ms-contact-sec" id="ms-contact">
+            <div class="ms-sec-lbl">Contact Us</div>
+            <div id="ms-contact-items"></div>
+          </div>
+          <!-- AI generating -->
+          <div class="ai-gen" id="ai-gen">
+            <div class="ai-spin-wrap">
+              <div class="ai-spin"></div>
+              <div class="ai-spin-icon"><svg viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3z"/></svg></div>
+            </div>
+            <div class="ai-gen-text">Writing your copy with AI...</div>
+            <div class="ai-gen-sub">Crafting taglines, descriptions & about copy</div>
+          </div>
+          <!-- Footer -->
+          <div class="ms-footer" id="ms-footer" style="background:#1E1B2E">
+            <div class="ms-footer-logo" id="ms-footer-logo">Your Business</div>
+            <div class="ms-footer-badge" id="ms-footer-badge">Made with LocalLaunch</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success screen -->
+      <div class="success-scr" id="success-scr">
+        <div class="success-icon-w">
+          <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        </div>
+        <div class="success-title">Your website is live! 🎉</div>
+        <div class="success-sub">Your professional business website is ready to share with the world.</div>
+        <div class="success-link-box">
+          <div class="slb-label">Your site URL</div>
+          <div id="success-url">locallaunch.app/site/your-business</div>
+        </div>
+        <div class="success-btns">
+          <button class="sbtn-p" id="view-site-btn">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="white"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+            View My Website
+          </button>
+          <button class="sbtn-s" onclick="window.location.href='Questionnaire.html'">
+            Build Another Site
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   AUTH GUARD + EDIT MODE
+═══════════════════════════════════════════════════════════ */
+const _LS = {
+  get:(k)=>{
+    if(k==='ll_session'){
+      try{ const ss=JSON.parse(sessionStorage.getItem('ll_session')||'null'); if(ss&&ss.id) return ss; }catch{}
+    }
+    try{ return JSON.parse(localStorage.getItem(k)); }catch{return null;}
+  },
+  set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))
+};
+const _session = _LS.get('ll_session');
+if(!_session){ window.location.href = 'Auth.html?redirect=Questionnaire.html'; throw new Error('Not authenticated'); }
+
+// Edit mode: pre-fill state from saved site
+const _editParams = new URLSearchParams(window.location.search);
+const _editId = _editParams.get('edit');
+if(_editId){
+  const _editSite = _LS.get('ll_edit_site');
+  if(_editSite && _editSite.id === _editId){
+    // Will be applied after state is declared — see BOOT section
+    window._editSite = _editSite;
+  }
+}
+
+const TEMPLATES = [
+  {name:"Obsidian",desc:"Dark luxury",
+   heroGrad:"linear-gradient(135deg,#0D0B18,#1C1929)",
+   accent:"#A78BFA",chip:"rgba(167,139,250,.15)",chipBorder:"rgba(167,139,250,.3)",chipColor:"#A78BFA",
+   navCta:"#7C3AED",footerBg:"#07060F",textDark:"#E2E0F0",textLight:"rgba(226,224,240,.6)",
+   previewCols:["#1C1929","#2D2A3E","#A78BFA"]},
+  {name:"Pearl",desc:"Clean minimal",
+   heroGrad:"linear-gradient(135deg,#F9FAFB,#EDE9FE)",
+   accent:"#7C3AED",chip:"rgba(124,58,237,.1)",chipBorder:"rgba(124,58,237,.2)",chipColor:"#7C3AED",
+   navCta:"#7C3AED",footerBg:"#1E1B2E",textDark:"#1E1B2E",textLight:"#6B7280",
+   previewCols:["#F9FAFB","#EDE9FE","#7C3AED"]},
+  {name:"Ember",desc:"Warm & bold",
+   heroGrad:"linear-gradient(135deg,#FFF7ED,#FEF3C7)",
+   accent:"#D97706",chip:"rgba(217,119,6,.12)",chipBorder:"rgba(217,119,6,.3)",chipColor:"#92400E",
+   navCta:"#D97706",footerBg:"#78350F",textDark:"#1C1917",textLight:"#78350F",
+   previewCols:["#FFF7ED","#FEF3C7","#D97706"]},
+  {name:"Glacier",desc:"Ocean cool",
+   heroGrad:"linear-gradient(135deg,#EFF6FF,#DBEAFE)",
+   accent:"#2563EB",chip:"rgba(37,99,235,.1)",chipBorder:"rgba(37,99,235,.2)",chipColor:"#1E40AF",
+   navCta:"#2563EB",footerBg:"#1E3A5F",textDark:"#1E3A5F",textLight:"#3B82F6",
+   previewCols:["#EFF6FF","#DBEAFE","#2563EB"]},
+  {name:"Sage",desc:"Natural earth",
+   heroGrad:"linear-gradient(135deg,#ECFDF5,#D1FAE5)",
+   accent:"#059669",chip:"rgba(5,150,105,.1)",chipBorder:"rgba(5,150,105,.25)",chipColor:"#065F46",
+   navCta:"#059669",footerBg:"#064E3B",textDark:"#064E3B",textLight:"#065F46",
+   previewCols:["#ECFDF5","#D1FAE5","#059669"]},
+  {name:"Rose",desc:"Luxury blush",
+   heroGrad:"linear-gradient(135deg,#FFF1F2,#FFE4E6)",
+   accent:"#E11D48",chip:"rgba(225,29,72,.1)",chipBorder:"rgba(225,29,72,.2)",chipColor:"#9F1239",
+   navCta:"#E11D48",footerBg:"#4C0519",textDark:"#1C0A0E",textLight:"#9F1239",
+   previewCols:["#FFF1F2","#FFE4E6","#E11D48"]},
+  {name:"Neon",desc:"Cyber edge",
+   heroGrad:"linear-gradient(135deg,#09090B,#18181B)",
+   accent:"#22D3EE",chip:"rgba(34,211,238,.12)",chipBorder:"rgba(34,211,238,.3)",chipColor:"#22D3EE",
+   navCta:"#22D3EE",footerBg:"#030712",textDark:"#F4F4F5",textLight:"rgba(244,244,245,.5)",
+   previewCols:["#09090B","#27272A","#22D3EE"]},
+  {name:"Gold",desc:"Premium glam",
+   heroGrad:"linear-gradient(135deg,#1A1400,#2D2200)",
+   accent:"#D4AF6A",chip:"rgba(212,175,106,.12)",chipBorder:"rgba(212,175,106,.3)",chipColor:"#D4AF6A",
+   navCta:"#D4AF6A",footerBg:"#0D0B00",textDark:"#FDF8E8",textLight:"rgba(253,248,232,.55)",
+   previewCols:["#1A1400","#2D2200","#D4AF6A"]},
+  {name:"Nordic",desc:"Scandinavian",
+   heroGrad:"linear-gradient(135deg,#FAFAFA,#F3F4F6)",
+   accent:"#374151",chip:"rgba(55,65,81,.08)",chipBorder:"rgba(55,65,81,.2)",chipColor:"#1F2937",
+   navCta:"#374151",footerBg:"#111827",textDark:"#111827",textLight:"#6B7280",
+   previewCols:["#FAFAFA","#F3F4F6","#374151"]},
+  {name:"Violet",desc:"Electric pop",
+   heroGrad:"linear-gradient(135deg,#F5F3FF,#EDE9FE)",
+   accent:"#8B5CF6",chip:"rgba(139,92,246,.1)",chipBorder:"rgba(139,92,246,.25)",chipColor:"#6D28D9",
+   navCta:"#8B5CF6",footerBg:"#2E1065",textDark:"#1E1B2E",textLight:"#6D28D9",
+   previewCols:["#F5F3FF","#EDE9FE","#8B5CF6"]},
+];
+
+const HERO_STYLES = [
+  {name:"Centered Hero",sub:"Bold centered headline with gradient background",
+   style:"centered",thumbCols:["#EDE9FE","#A78BFA"]},
+  {name:"Split Layout",sub:"Text left, visual illustration right",
+   style:"split",thumbCols:["#F9FAFB","#7C3AED"]},
+  {name:"Full-Width Bold",sub:"Edge-to-edge dark section with oversized type",
+   style:"fullwidth",thumbCols:["#1E1B2E","#A78BFA"]},
+  {name:"Minimal Type",sub:"Clean typography-first, no background effects",
+   style:"minimal",thumbCols:["#FFFFFF","#374151"]},
+  {name:"Glass Card",sub:"Frosted glass card floating on gradient mesh",
+   style:"glass",thumbCols:["#EFF6FF","#2563EB"]},
+];
+
+const FONT_PAIRS = [
+  {name:"Elegant Classic",display:"Playfair Display",body:"DM Sans",
+   sampleH:"Luxury & Refined",sampleB:"Professional serif meets modern sans."},
+  {name:"Editorial Modern",display:"Fraunces",body:"Outfit",
+   sampleH:"Bold & Editorial",sampleB:"Expressive headlines with clean body."},
+  {name:"Bold Impact",display:"Bebas Neue",body:"Raleway",
+   sampleH:"POWER STATEMENT",sampleB:"High-impact display with elegant body."},
+  {name:"Luxury Serif",display:"Cinzel",body:"Raleway",
+   sampleH:"Timeless Prestige",sampleB:"Classical elegance for premium brands."},
+  {name:"Avant-Garde",display:"Syne",body:"DM Sans",
+   sampleH:"Future Forward",sampleB:"Geometric display with clean utility."},
+  {name:"Contemporary",display:"Josefin Sans",body:"Outfit",
+   sampleH:"Clean & Modern",sampleB:"Geometric sans for sleek businesses."},
+];
+
+const PALETTES = [
+  {name:"Royal Violet",mood:"Sophisticated",colors:["#A78BFA","#EDE9FE","#7C3AED"]},
+  {name:"Midnight Gold",mood:"Luxurious",colors:["#D4AF6A","#1A1400","#F5D58A"]},
+  {name:"Ocean Deep",mood:"Trustworthy",colors:["#2563EB","#EFF6FF","#1E40AF"]},
+  {name:"Forest & Cream",mood:"Natural",colors:["#059669","#ECFDF5","#064E3B"]},
+  {name:"Blush Chic",mood:"Feminine",colors:["#E11D48","#FFF1F2","#9F1239"]},
+  {name:"Slate & Stone",mood:"Professional",colors:["#374151","#F9FAFB","#111827"]},
+];
+
+const TONES = [
+  {name:"Friendly & Warm",sub:"Welcoming, casual, approachable",ico:"🤝",bg:"rgba(251,191,36,.12)"},
+  {name:"Professional",sub:"Formal, credible, trustworthy",ico:"💼",bg:"rgba(167,139,250,.1)"},
+  {name:"Bold & Confident",sub:"Direct, powerful, memorable",ico:"⚡",bg:"rgba(239,68,68,.1)"},
+  {name:"Luxury & Refined",sub:"Elevated, premium, exclusive",ico:"💎",bg:"rgba(212,175,106,.1)"},
+  {name:"Creative & Fun",sub:"Playful, energetic, inspiring",ico:"🎨",bg:"rgba(34,211,238,.08)"},
+];
+
+const ANIMATIONS = [
+  {name:"None",sub:"Static, instant",ico:"⛔"},
+  {name:"Subtle",sub:"Gentle fades",ico:"✨"},
+  {name:"Dynamic",sub:"Scroll reveals",ico:"🌊"},
+  {name:"Bold",sub:"Full motion",ico:"🚀"},
+];
+
+const TAGLINES = {
+  "Restaurant":"Where Every Bite Tells a Story",
+  "Salon":"Where Beauty Meets Confidence",
+  "Gym":"Transform Your Body, Transform Your Life",
+  "Retail Shop":"Quality You Can See, Value You Can Feel",
+  "Clinic":"Your Health, Our Priority",
+  "Law Firm":"Justice, Integrity, Excellence",
+  "Photography":"Capturing Moments That Last Forever",
+  "Tech":"Innovating Tomorrow, Today",
+  "Consulting":"Strategy That Moves Business Forward",
+  "Real Estate":"Turning Houses Into Dream Homes",
+  "Bakery":"Baked with Love, Served with Joy",
+  "Education":"Inspiring Minds, Shaping Futures",
+  "Other":"Excellence in Everything We Do"
+};
+
+const PROG_LABELS = [
+  "Tell us your business name","What type of business?",
+  "List your services","Where are you located?","How can customers reach you?",
+  "Upload your brand logo","Choose your template style","Pick your hero section",
+  "Select your font pairing","Choose your colour palette","Set your brand tone",
+  "Animation preference","Remove the LocalLaunch badge"
+];
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════ */
+const state = {
+  name:"", type:"", services:"", location:"",
+  phone:"", email:"",
+  instagram:"", facebook:"", whatsapp:"", linkedin:"",
+  logo: null, logoName:"",
+  template:0, heroStyle:0, fontPair:0, palette:0, tone:0, animation:1,
+  referrals:["",""],
+  removeBadge: false
+};
+let step = 0;
+const TOTAL = 13;
+
+function slugify(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"your-business"; }
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER DOTS & PROGRESS
+═══════════════════════════════════════════════════════════ */
+function renderDots(){
+  const pct = Math.round(((step+1)/TOTAL)*100);
+  document.getElementById("prog-fill").style.width = pct+"%";
+  document.getElementById("prog-pct").textContent = pct+"%";
+  document.getElementById("step-counter").textContent = `Step ${step+1} of ${TOTAL}`;
+  document.getElementById("prog-lbl").textContent = PROG_LABELS[step];
+  document.getElementById("prog-steps").innerHTML =
+    [...Array(TOTAL)].map((_,i)=>
+      `<div class="ps${i<step?" done":i===step?" cur":""}"></div>`).join("");
+  document.getElementById("step-dots").innerHTML =
+    [...Array(TOTAL)].map((_,i)=>
+      `<div class="sdot${i<step?" done":i===step?" active":""}" onclick="jumpTo(${i})"></div>`).join("");
+  const bb = document.getElementById("btn-back");
+  bb.style.opacity = step===0?"0.3":"1";
+  bb.disabled = step===0;
+  const bn = document.getElementById("btn-next");
+  bn.disabled = false;
+  if(step===TOTAL-1){
+    bn.innerHTML = `<svg viewBox="0 0 24 24" width="13" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg> Generate My Website`;
+  } else {
+    bn.innerHTML = `Continue <svg viewBox="0 0 24 24" width="13" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>`;
+  }
+}
+function jumpTo(i){ if(i<=step){ step=i; renderQuestion(); } }
+
+/* ═══════════════════════════════════════════════════════════
+   QUESTION TEMPLATES
+═══════════════════════════════════════════════════════════ */
+function renderQuestion(){
+  renderDots();
+  const area = document.getElementById("q-area");
+  area.innerHTML = `<div class="q-slide">${getQ(step)}</div>`;
+  if(step===0){ bindCharCount("q-input","cc",60); }
+  if(step===5){ bindLogoUpload(); }
+  if(step===12){ bindReferrals(); }
+}
+
+function eyebrow(s){ return `<div class="q-eyebrow"><div class="q-eyebrow-line"></div><div class="q-eyebrow-text">${s}</div></div>`; }
+function hint(t){ return `<div class="q-hint"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>${t}</div>`; }
+function checkSVG(){ return `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`; }
+
+function getQ(s){
+  switch(s){
+    case 0: return `
+      ${eyebrow("Step 1 — Business Name")}
+      <div class="q-title">What's your business name?</div>
+      ${hint("This becomes your website headline and brand identity.")}
+      <div class="inp-wrap">
+        <svg class="inp-ico" viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10z"/></svg>
+        <input class="inp" id="q-input" placeholder="e.g. Bella's Salon, Nova Tech..." value="${state.name}" oninput="state.name=this.value;updatePrev('name')" maxlength="60"/>
+      </div>
+      <div class="cc" id="cc">${state.name.length}/60</div>`;
+
+    case 1: return `
+      ${eyebrow("Step 2 — Business Type")}
+      <div class="q-title">What type of business are you?</div>
+      ${hint("We use this to tailor your icons, tone and layout.")}
+      <div class="inp-wrap">
+        <svg class="inp-ico" viewBox="0 0 24 24"><path d="M20 6h-2.18c.07-.44.18-.88.18-1.35C18 2.53 15.5 1 13 1c-1.4 0-2.8.59-3.75 1.63l-.75.83-.75-.83C6.8 1.59 5.4 1 4 1 1.5 1 0 2.53 0 4.65c0 .47.11.91.18 1.35H0v2h20v-2z"/></svg>
+        <select class="inp" onchange="state.type=this.value;updatePrev('type')">
+          <option value="" disabled ${!state.type?"selected":""}>Select your business type...</option>
+          ${["Restaurant","Salon","Gym","Retail Shop","Clinic","Law Firm","Photography","Tech","Consulting","Real Estate","Bakery","Education","Other"]
+            .map(t=>`<option value="${t}"${state.type===t?" selected":""}>${t}</option>`).join("")}
+        </select>
+        <svg class="sel-arr" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+      </div>`;
+
+    case 2: return `
+      ${eyebrow("Step 3 — Services")}
+      <div class="q-title">What services do you offer?</div>
+      ${hint("Separate with commas. e.g. Hair Styling, Nail Art, Facials")}
+      <textarea class="inp no-ico" placeholder="Hair Styling, Nail Art, Facials, Makeup..." oninput="state.services=this.value;updatePrev('services')">${state.services}</textarea>`;
+
+    case 3: return `
+      ${eyebrow("Step 4 — Location")}
+      <div class="q-title">Where are you located?</div>
+      ${hint("Your full address helps with Google Maps and local SEO.")}
+      <div class="inp-wrap">
+        <svg class="inp-ico" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        <input class="inp" placeholder="123 Main Street, City, Country" value="${state.location}" oninput="state.location=this.value;updatePrev('contact')"/>
+      </div>`;
+
+    case 4: return `
+      ${eyebrow("Step 5 — Contact & Social")}
+      <div class="q-title">How can customers reach you?</div>
+      ${hint("We'll add these to your Contact section, footer, and social icons.")}
+      <div class="inp-row">
+        <div class="inp-wrap">
+          <svg class="inp-ico" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+          <input class="inp" type="tel" placeholder="Phone number" value="${state.phone}" oninput="state.phone=this.value;updatePrev('contact')"/>
+        </div>
+        <div class="inp-wrap">
+          <svg class="inp-ico" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+          <input class="inp" type="email" placeholder="Email address" value="${state.email}" oninput="state.email=this.value;updatePrev('contact')"/>
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:10px;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">Social Media (optional)</div>
+      <div class="inp-row" style="margin-bottom:8px">
+        <div class="inp-wrap">
+          <svg class="inp-ico" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          <input class="inp" type="url" placeholder="Instagram URL" value="${state.instagram||''}" oninput="state.instagram=this.value"/>
+        </div>
+        <div class="inp-wrap">
+          <svg class="inp-ico" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          <input class="inp" type="url" placeholder="Facebook URL" value="${state.facebook||''}" oninput="state.facebook=this.value"/>
+        </div>
+      </div>
+      <div class="inp-row">
+        <div class="inp-wrap">
+          <svg class="inp-ico" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          <input class="inp" type="tel" placeholder="WhatsApp number" value="${state.whatsapp||''}" oninput="state.whatsapp=this.value"/>
+        </div>
+        <div class="inp-wrap">
+          <svg class="inp-ico" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+          <input class="inp" type="url" placeholder="LinkedIn URL" value="${state.linkedin||''}" oninput="state.linkedin=this.value"/>
+        </div>
+      </div>`;
+
+    case 5: return `
+      ${eyebrow("Step 6 — Brand Logo")}
+      <div class="q-title">Upload your brand logo.</div>
+      ${hint("PNG or SVG with transparent background works best.")}
+      <div class="logo-upload-zone${state.logo?" has-logo":""}" id="logo-zone">
+        <input type="file" class="lu-input" id="logo-input" accept="image/*"/>
+        <div class="lu-icon"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></div>
+        <div class="lu-title">${state.logo?"✅ Logo uploaded!":"Click or drag to upload logo"}</div>
+        <div class="lu-sub">${state.logo?state.logoName:"PNG, SVG, JPG — max 5MB"}</div>
+      </div>
+      <div class="logo-preview-wrap" id="logo-preview-wrap"${state.logo?' style="display:flex"':""}>
+        ${state.logo?`<img class="logo-preview-img" src="${state.logo}" alt="Logo"/>`:""}
+        ${state.logo?`<div class="logo-preview-name">${state.logoName}</div>`:""}
+        ${state.logo?`<button class="logo-remove" onclick="removeLogo()">✕ Remove</button>`:""}
+      </div>
+      <div class="logo-skip">No logo yet? <a onclick="nextStep()">Skip this step →</a></div>`;
+
+    case 6: return `
+      ${eyebrow("Step 7 — Template")}
+      <div class="q-title">Choose your website template.</div>
+      ${hint("10 premium templates — all fully responsive & customisable.")}
+      <div class="tpl-grid">
+        ${TEMPLATES.map((t,i)=>`
+          <div class="tpl-card${state.template===i?" sel":""}" onclick="selTpl(${i})">
+            <div class="tpl-chk">${checkSVG()}</div>
+            <div class="tpl-prev" style="background:${t.heroGrad}">
+              <div class="tpl-prev-lines">
+                <div class="tpl-prev-bar" style="background:${t.previewCols[2]};width:40%"></div>
+                <div class="tpl-prev-line" style="background:${t.previewCols[2]};width:65%"></div>
+                <div class="tpl-prev-line" style="background:${t.previewCols[2]};width:45%"></div>
+              </div>
+            </div>
+            <div class="tpl-info">
+              <div class="tpl-name">${t.name}</div>
+              <div class="tpl-desc">${t.desc}</div>
+            </div>
+          </div>`).join("")}
+      </div>`;
+
+    case 7: return `
+      ${eyebrow("Step 8 — Hero Section")}
+      <div class="q-title">Pick your hero section style.</div>
+      ${hint("The hero is the first thing visitors see — make it count.")}
+      <div class="hero-grid">
+        ${HERO_STYLES.map((h,i)=>`
+          <div class="hero-card${state.heroStyle===i?" sel":""}" onclick="selHero(${i})">
+            <div class="hero-thumb" style="background:linear-gradient(135deg,${h.thumbCols[0]},${h.thumbCols[1]})">
+              <div class="hero-thumb-bar" style="background:${h.thumbCols[1]};height:5px"></div>
+              <div class="hero-thumb-body">
+                <div class="hero-thumb-h" style="background:${h.thumbCols[1]};height:5px;width:70%"></div>
+                <div class="hero-thumb-p" style="background:${h.thumbCols[1]};height:3px;width:50%"></div>
+                <div class="hero-thumb-btn" style="background:${h.thumbCols[1]}"></div>
+              </div>
+            </div>
+            <div class="hero-meta">
+              <div class="hero-name">${h.name}</div>
+              <div class="hero-sub">${h.sub}</div>
+            </div>
+            <div class="hero-radio">${checkSVG()}</div>
+          </div>`).join("")}
+      </div>`;
+
+    case 8: return `
+      ${eyebrow("Step 9 — Font Pairing")}
+      <div class="q-title">Choose your font pairing.</div>
+      ${hint("Typography sets the entire personality of your brand.")}
+      <div class="font-grid">
+        ${FONT_PAIRS.map((f,i)=>`
+          <div class="font-card${state.fontPair===i?" sel":""}" onclick="selFont(${i})">
+            <div class="font-chk">${checkSVG()}</div>
+            <div class="font-sample-h" style="font-family:'${f.display}',serif">${f.sampleH}</div>
+            <div class="font-sample-b" style="font-family:'${f.body}',sans-serif">${f.sampleB}</div>
+            <div class="font-pair-name">${f.name}</div>
+          </div>`).join("")}
+      </div>`;
+
+    case 9: return `
+      ${eyebrow("Step 10 — Color Palette")}
+      <div class="q-title">Choose your colour palette.</div>
+      ${hint("Sets the mood and emotion of your entire website.")}
+      <div class="pal-grid">
+        ${PALETTES.map((p,i)=>`
+          <div class="pal-card${state.palette===i?" sel":""}" onclick="selPal(${i})">
+            <div class="pal-chk">${checkSVG()}</div>
+            <div class="pal-swatches">${p.colors.map(c=>`<div class="pal-sw" style="background:${c}"></div>`).join("")}</div>
+            <div class="pal-name">${p.name}</div>
+            <div class="pal-mood">${p.mood}</div>
+          </div>`).join("")}
+      </div>`;
+
+    case 10: return `
+      ${eyebrow("Step 11 — Brand Tone")}
+      <div class="q-title">How should your website sound?</div>
+      ${hint("This shapes every word of AI-generated copy on your site.")}
+      <div class="tone-grid">
+        ${TONES.map((t,i)=>`
+          <div class="tone-card${state.tone===i?" sel":""}" onclick="selTone(${i})" style="${state.tone===i?"background:"+t.bg:""}">
+            <div class="tone-icon-wrap" style="background:${t.bg}">${t.ico}</div>
+            <div>
+              <div class="tone-name">${t.name}</div>
+              <div class="tone-sub">${t.sub}</div>
+            </div>
+            <div class="tone-radio">${checkSVG()}</div>
+          </div>`).join("")}
+      </div>`;
+
+    case 11: return `
+      ${eyebrow("Step 12 — Animations")}
+      <div class="q-title">Choose your animation style.</div>
+      ${hint("Controls how elements appear and move on your website.")}
+      <div class="anim-grid">
+        ${ANIMATIONS.map((a,i)=>`
+          <div class="anim-card${state.animation===i?" sel":""}" onclick="selAnim(${i})">
+            <div class="anim-chk">${checkSVG()}</div>
+            <div class="anim-icon">${a.ico}</div>
+            <div class="anim-name">${a.name}</div>
+            <div class="anim-sub">${a.sub}</div>
+          </div>`).join("")}
+      </div>`;
+
+    case 12: return `
+      ${eyebrow("Step 13 — Remove Badge")}
+      <div class="q-title">Remove the "Made with LocalLaunch" badge?</div>
+      ${hint("Refer 2 friends and your site goes fully white-labelled — no badge, 100% yours.")}
+      <div class="ref-box">
+        <div class="ref-title">🎁 Unlock White Label — Free</div>
+        <div class="ref-sub">Enter 2 friend emails below. When they sign up, your "Made with LocalLaunch" footer badge is permanently removed.</div>
+        <div class="ref-inputs" id="ref-inputs">
+          <div class="inp-wrap">
+            <svg class="inp-ico" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            <input class="inp" type="email" placeholder="Friend #1 email address" value="${state.referrals[0]}" oninput="state.referrals[0]=this.value;checkReferrals()" id="ref1"/>
+          </div>
+          <div class="inp-wrap">
+            <svg class="inp-ico" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            <input class="inp" type="email" placeholder="Friend #2 email address" value="${state.referrals[1]}" oninput="state.referrals[1]=this.value;checkReferrals()" id="ref2"/>
+          </div>
+        </div>
+        <div class="ref-status" id="ref-status"></div>
+      </div>
+      <div class="no-ref-option">No referrals? <a onclick="nextStep()">Skip & keep the badge →</a></div>`;
+
+    default: return "";
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SELECTION HANDLERS
+═══════════════════════════════════════════════════════════ */
+function selTpl(i){ state.template=i; updatePrev("template"); renderQuestion(); }
+function selHero(i){ state.heroStyle=i; updatePrev("hero"); renderQuestion(); }
+function selFont(i){ state.fontPair=i; updatePrev("font"); renderQuestion(); }
+function selPal(i){ state.palette=i; updatePrev("palette"); renderQuestion(); }
+function selTone(i){ state.tone=i; updatePrev("tone"); renderQuestion(); }
+function selAnim(i){ state.animation=i; renderQuestion(); }
+
+/* ═══════════════════════════════════════════════════════════
+   LOGO UPLOAD
+═══════════════════════════════════════════════════════════ */
+function bindLogoUpload(){
+  const inp = document.getElementById("logo-input");
+  if(!inp) return;
+  inp.addEventListener("change", e=>{
+    const f = e.target.files[0];
+    if(!f) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      state.logo = ev.target.result;
+      state.logoName = f.name;
+      renderQuestion();
+      updatePrev("logo");
+    };
+    reader.readAsDataURL(f);
+  });
+}
+function removeLogo(){
+  state.logo = null; state.logoName = "";
+  renderQuestion();
+  updatePrev("logo");
+}
+
+/* ═══════════════════════════════════════════════════════════
+   REFERRALS
+═══════════════════════════════════════════════════════════ */
+function bindReferrals(){ checkReferrals(); }
+function isValidEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function checkReferrals(){
+  const r1 = state.referrals[0];
+  const r2 = state.referrals[1];
+  const both = isValidEmail(r1) && isValidEmail(r2) && r1!==r2;
+  const st = document.getElementById("ref-status");
+  if(!st) return;
+  if(both){
+    state.removeBadge = true;
+    st.style.display="block";
+    st.className="ref-status ok";
+    st.textContent="✅ Badge will be removed from your site!";
+    updatePrev("badge");
+  } else if(r1||r2){
+    state.removeBadge = false;
+    st.style.display="block";
+    st.className="ref-status pending";
+    st.textContent="Add 1 more valid email to unlock white label.";
+    updatePrev("badge");
+  } else {
+    state.removeBadge = false;
+    st.style.display="none";
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHAR COUNT BINDING
+═══════════════════════════════════════════════════════════ */
+function bindCharCount(inputId, ccId, max){
+  const inp = document.getElementById(inputId);
+  const cc = document.getElementById(ccId);
+  if(inp&&cc) inp.addEventListener("input",()=>{ cc.textContent=inp.value.length+"/"+max; });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LIVE PREVIEW
+═══════════════════════════════════════════════════════════ */
+function showBrowser(){
+  document.getElementById("empty-state").style.display="none";
+  document.getElementById("prev-browser").style.display="block";
+}
+function revealEl(el){
+  el.style.display="block";
+  el.style.animation="none";
+  void el.offsetWidth;
+  el.style.animation="chip-pop .4s ease both";
+}
+
+function updatePrev(type){
+  const tpl = TEMPLATES[state.template];
+  const pal = PALETTES[state.palette];
+
+  if(type==="name"||type==="type"){
+    showBrowser();
+    const slug = slugify(state.name);
+    document.getElementById("pb-url").textContent = `locallaunch.app/site/${slug}`;
+    document.getElementById("ms-logo-text").textContent = state.name||"Your Business";
+    document.getElementById("ms-biz-name").textContent = state.name||"Your Business Name";
+    document.getElementById("ms-footer-logo").textContent = state.name||"Your Business";
+    applyTemplate();
+  }
+
+  if(type==="services"){
+    const items = state.services.split(",").map(s=>s.trim()).filter(Boolean);
+    const sv = document.getElementById("ms-services");
+    const grid = document.getElementById("ms-svc-grid");
+    if(items.length){
+      revealEl(sv);
+      grid.innerHTML = items.map((s,i)=>
+        `<div class="ms-svc-chip" style="background:${tpl.chip};border-color:${tpl.chipBorder};color:${tpl.chipColor};animation-delay:${i*.06}s">${s}</div>`
+      ).join("");
+      document.getElementById("ms-footer").style.display="flex";
+    } else { sv.style.display="none"; }
+  }
+
+  if(type==="contact"){
+    const ct = document.getElementById("ms-contact");
+    const ci = document.getElementById("ms-contact-items");
+    let h="";
+    if(state.location) h+=`<div class="ms-contact-item"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>${state.location}</div>`;
+    if(state.phone) h+=`<div class="ms-contact-item"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>${state.phone}</div>`;
+    if(state.email) h+=`<div class="ms-contact-item"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>${state.email}</div>`;
+    if(h){ revealEl(ct); ci.innerHTML=h; document.getElementById("ms-footer").style.display="flex"; }
+    else { ct.style.display="none"; }
+  }
+
+  if(type==="logo"){
+    const img = document.getElementById("ms-logo-img");
+    const txt = document.getElementById("ms-logo-text");
+    if(state.logo){
+      img.src = state.logo;
+      img.style.display = "block";
+      txt.style.display = "none";
+    } else {
+      img.style.display = "none";
+      txt.style.display = "block";
+    }
+  }
+
+  if(type==="template") applyTemplate();
+  if(type==="palette") applyPalette();
+
+  if(type==="font"){
+    const fp = FONT_PAIRS[state.fontPair] || FONT_PAIRS[0];
+    const hFont = `'${fp.display}', serif`;
+    const bizEl = document.getElementById("ms-biz-name");
+    const logoEl = document.getElementById("ms-logo-text");
+    const footEl = document.getElementById("ms-footer-logo");
+    bizEl.style.transition = "all .35s";
+    logoEl.style.transition = "all .35s";
+    bizEl.style.opacity = "0.3";
+    setTimeout(()=>{
+      bizEl.style.fontFamily = hFont;
+      logoEl.style.fontFamily = hFont;
+      if(footEl) footEl.style.fontFamily = hFont;
+      bizEl.style.opacity = "1";
+    }, 280);
+  }
+
+  if(type==="tone"){
+    const TONE_SAMPLES = [
+      "Here for you, every step of the way 😊",
+      "Delivering excellence with precision.",
+      "We don't do average. Only the best.",
+      "An experience curated for the discerning few.",
+      "Let's create something amazing together! 🎨",
+    ];
+    const TONE_COLORS = ["#10B981","#7C3AED","#EF4444","#D4AF6A","#EC4899"];
+    const tagEl = document.getElementById("ms-tagline");
+    tagEl.style.transition = "all .35s";
+    tagEl.style.opacity = "0";
+    setTimeout(()=>{
+      tagEl.textContent = `"${TONE_SAMPLES[state.tone] || TONE_SAMPLES[1]}"`;
+      tagEl.style.opacity = "1";
+    }, 280);
+    const badge = document.getElementById("ms-badge");
+    if(badge){
+      badge.style.background = (TONE_COLORS[state.tone]||"#7C3AED")+"22";
+      badge.style.color = TONE_COLORS[state.tone]||"#7C3AED";
+    }
+  }
+
+  if(type==="hero"){
+    const hero = document.getElementById("ms-hero");
+    const bizEl = document.getElementById("ms-biz-name");
+    const tagEl = document.getElementById("ms-tagline");
+    const orb = document.getElementById("ms-orb");
+    // Each hero style has a distinct visual personality shown in preview
+    const HERO_CFGS = [
+      {align:"center",pad:"24px 18px 18px",nameSize:"17px",orbOp:"0.25",bold:false}, // centered
+      {align:"left",  pad:"20px 18px 18px",nameSize:"16px",orbOp:"0",   bold:false}, // split
+      {align:"left",  pad:"28px 18px 18px",nameSize:"22px",orbOp:"0.15",bold:true},  // fullwidth
+      {align:"center",pad:"32px 18px",     nameSize:"15px",orbOp:"0",   bold:false}, // minimal
+      {align:"center",pad:"20px 14px",     nameSize:"16px",orbOp:"0.15",bold:false}, // glass
+    ];
+    const cfg = HERO_CFGS[state.heroStyle] || HERO_CFGS[0];
+    hero.style.padding = cfg.pad;
+    bizEl.style.textAlign = cfg.align;
+    bizEl.style.fontSize = cfg.nameSize;
+    bizEl.style.fontWeight = cfg.bold ? "900" : "700";
+    tagEl.style.textAlign = cfg.align;
+    if(orb) orb.style.opacity = cfg.orbOp;
+
+    // Split style: inject a small visual box on the right
+    let sv = document.getElementById("ms-split-vis");
+    if(state.heroStyle === 1){
+      if(!sv){
+        sv = document.createElement("div");
+        sv.id = "ms-split-vis";
+        sv.style.cssText = "position:absolute;right:12px;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:8px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:20px;pointer-events:none";
+        sv.textContent = "🏪";
+        hero.appendChild(sv);
+      }
+      sv.style.opacity = "1";
+    } else if(sv){
+      sv.style.opacity = "0";
+    }
+
+    // Glass style: give hero a frosted inner card feel
+    if(state.heroStyle === 4){
+      hero.style.backdropFilter = "blur(8px)";
+      hero.style.border = "1px solid rgba(255,255,255,.1)";
+    } else {
+      hero.style.backdropFilter = "";
+      hero.style.border = "";
+    }
+  }
+
+  if(type==="badge"){
+    const badge = document.getElementById("ms-footer-badge");
+    badge.className = "ms-footer-badge" + (state.removeBadge?" hidden":"");
+  }
+}
+
+function applyTemplate(){
+  const tpl = TEMPLATES[state.template];
+  showBrowser();
+  document.getElementById("ms-hero").style.background = tpl.heroGrad;
+  document.getElementById("ms-orb").style.background = tpl.accent;
+  document.getElementById("ms-cta-btn").style.background = tpl.navCta;
+  document.getElementById("ms-nav-cta").style.background = tpl.navCta;
+  document.getElementById("ms-biz-name").style.color = tpl.textDark;
+  document.getElementById("ms-tagline").style.color = tpl.textLight;
+  document.getElementById("ms-footer").style.background = tpl.footerBg;
+  // re-render chips
+  if(state.services){
+    const items = state.services.split(",").map(s=>s.trim()).filter(Boolean);
+    document.getElementById("ms-svc-grid").innerHTML = items.map(s=>
+      `<div class="ms-svc-chip" style="background:${tpl.chip};border-color:${tpl.chipBorder};color:${tpl.chipColor}">${s}</div>`
+    ).join("");
+  }
+}
+
+function applyPalette(){
+  // Palette affects badge/accent colours in the live preview
+  const pal = PALETTES[state.palette];
+  document.getElementById("ms-badge").style.background = pal.colors[0]+"22";
+  document.getElementById("ms-badge").style.color = pal.colors[2];
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════════ */
+function nextStep(){
+  if(step===TOTAL-1){ generateSite(); return; }
+  // Animate AI copy on tone step
+  if(step===10) simulateAI();
+  step++;
+  renderQuestion();
+}
+function prevStep(){ if(step>0){ step--; renderQuestion(); } }
+
+function simulateAI(){
+  document.getElementById("ai-gen").style.display="flex";
+  const tagline = TAGLINES[state.type]||TAGLINES["Other"];
+  setTimeout(()=>{
+    document.getElementById("ai-gen").style.display="none";
+    document.getElementById("ms-tagline").textContent = `"${tagline}"`;
+    document.getElementById("ms-tagline").style.fontStyle = "italic";
+  }, 2000);
+}
+
+function generateSite(){
+  const btn = document.getElementById("btn-next");
+  btn.disabled = true;
+  btn.innerHTML = `<div style="width:13px;height:13px;border:2px solid rgba(0,0,0,.2);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite"></div> Building...`;
+
+  simulateAI();
+
+  setTimeout(()=>{
+    const params = new URLSearchParams({
+      name: state.name||"My Business",
+      type: state.type||"Business",
+      services: state.services||"Our Services",
+      location: state.location||"",
+      phone: state.phone||"",
+      email: state.email||"",
+      instagram: state.instagram||"",
+      facebook: state.facebook||"",
+      whatsapp: state.whatsapp||"",
+      linkedin: state.linkedin||"",
+      palette: state.palette,
+      template: state.template,
+      tone: state.tone,
+      heroStyle: state.heroStyle,
+      fontPair: state.fontPair,
+      animation: state.animation,
+      removeBadge: state.removeBadge ? "1" : "0",
+    });
+
+    // Store logo in sessionStorage (too big for URL)
+    if(state.logo) sessionStorage.setItem("ll_logo", state.logo);
+    else sessionStorage.removeItem("ll_logo");
+
+    // ── Save site to user's localStorage account ──────────────
+    const _sess = _LS.get('ll_session');
+    // Generate ID ONCE — same variable used for save AND URL
+    const _finalSiteId = _editId || ('s_' + Date.now());
+    if(_sess){
+      const _sitesKey = 'll_sites_' + _sess.id;
+      const _sites = _LS.get(_sitesKey) || [];
+      const _existingSite = _sites.find(s=>s.id===_finalSiteId);
+      const _siteData = {
+        id: _finalSiteId,
+        userId: _sess.id,
+        name: state.name || 'My Business',
+        type: state.type || 'Business',
+        template: state.template,
+        status: 'live',
+        params: params.toString(),
+        logo: state.logo || null,
+        createdAt: _existingSite ? _existingSite.createdAt : Date.now(),
+        updatedAt: Date.now(),
+      };
+      const _idx = _sites.findIndex(s=>s.id===_finalSiteId);
+      if(_idx > -1){ _sites[_idx] = _siteData; } else { _sites.unshift(_siteData); }
+      try { _LS.set(_sitesKey, _sites); }
+      catch(e) {
+        // localStorage full — retry without logo
+        _siteData.logo = null;
+        _LS.set(_sitesKey, _sites.map(s=>s.id===_finalSiteId?_siteData:s));
+      }
+      localStorage.removeItem('ll_edit_site');
+    }
+
+    window.location.href = "LocalLaunch-site.html?" + params.toString() + "&siteId=" + _finalSiteId;
+  }, 2800);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════════════ */
+// If editing an existing site, pre-load its state
+if(window._editSite){
+  const _es = window._editSite;
+  const _ep = new URLSearchParams(_es.params || '');
+  state.name      = _es.name || state.name;
+  state.type      = _ep.get('type') || state.type;
+  state.services  = _ep.get('services') || state.services;
+  state.location  = _ep.get('location') || state.location;
+  state.phone     = _ep.get('phone') || state.phone;
+  state.email     = _ep.get('email') || state.email;
+  state.instagram = _ep.get('instagram') || state.instagram;
+  state.facebook  = _ep.get('facebook') || state.facebook;
+  state.whatsapp  = _ep.get('whatsapp') || state.whatsapp;
+  state.linkedin  = _ep.get('linkedin') || state.linkedin;
+  state.template  = parseInt(_ep.get('template')||0);
+  state.heroStyle = parseInt(_ep.get('heroStyle')||0);
+  state.fontPair  = parseInt(_ep.get('fontPair')||0);
+  state.palette   = parseInt(_ep.get('palette')||0);
+  state.tone      = parseInt(_ep.get('tone')||0);
+  state.animation = parseInt(_ep.get('animation')||1);
+  state.removeBadge = _ep.get('removeBadge')==='1';
+  if(_es.logo){ state.logo = _es.logo; }
+}
+renderQuestion();
+
+// Show logged-in user in topbar
+(function(){
+  const s = _LS.get('ll_session');
+  if(!s) return;
+  const tbRight = document.getElementById('q-tb-right');
+  if(!tbRight) return;
+  const initials = s.name ? s.name.slice(0,2).toUpperCase() : '??';
+  const firstName = s.name ? s.name.split(' ')[0] : 'You';
+  // Insert before first child
+  const userChip = document.createElement('a');
+  userChip.href = 'Dashboard.html';
+  userChip.style.cssText = 'display:inline-flex;align-items:center;gap:7px;padding:5px 12px 5px 6px;border-radius:100px;background:rgba(212,175,106,.08);border:1px solid rgba(212,175,106,.15);text-decoration:none;margin-right:4px;';
+  userChip.innerHTML = `<span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#D4AF6A,#F5D58A);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#0D0B18;flex-shrink:0">${initials}</span><span style="font-size:11px;font-weight:600;color:#D4AF6A">${firstName}</span>`;
+  tbRight.insertBefore(userChip, tbRight.firstChild);
+})();
+
+</script>
+</body>
+</html>

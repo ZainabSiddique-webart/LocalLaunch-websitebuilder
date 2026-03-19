@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard — LocalLaunch</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0D0B18;--ink2:#1C1929;--ink3:#2D2A3E;
+  --gold:#D4AF6A;--gold2:#F5D58A;
+  --lav:#A78BFA;--purple:#7C3AED;
+  --border:rgba(167,139,250,.12);--border-gold:rgba(212,175,106,.15);
+  --mid:rgba(255,255,255,.38);--card:rgba(255,255,255,.03);
+  --grad-gold:linear-gradient(135deg,#D4AF6A,#F5D58A);
+}
+html,body{min-height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:white;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(212,175,106,.2);border-radius:4px}
+
+body::before{content:'';position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 50% at 50% 0%, rgba(124,58,237,.1) 0%, transparent 70%);z-index:0}
+.page{position:relative;z-index:1}
+
+/* ── TOPBAR ── */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  height:60px;padding:0 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(13,11,24,.97);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+}
+.tb-logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.tb-gem{width:30px;height:30px;border-radius:8px;background:var(--grad-gold);display:flex;align-items:center;justify-content:center}
+.tb-gem svg{width:14px;height:14px;fill:#0D0B18}
+.tb-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:white}
+.tb-name span{color:var(--gold)}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-new{
+  padding:8px 18px;border-radius:100px;
+  background:var(--grad-gold);color:#0D0B18;
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;
+  border:none;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;gap:6px;letter-spacing:.03em;
+}
+.tb-new:hover{transform:scale(1.04);box-shadow:0 6px 24px rgba(212,175,106,.3)}
+.tb-new svg{width:12px;height:12px;fill:#0D0B18}
+.tb-user{
+  display:flex;align-items:center;gap:8px;cursor:pointer;
+  padding:5px 10px;border-radius:10px;transition:background .2s;
+  position:relative;
+}
+.tb-user:hover{background:rgba(255,255,255,.05)}
+.tb-av{width:32px;height:32px;border-radius:50%;background:var(--grad-gold);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#0D0B18;flex-shrink:0}
+.tb-uname{font-size:13px;font-weight:600;color:white;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-menu{
+  position:absolute;top:calc(100% + 8px);right:0;
+  background:rgba(28,25,41,.98);backdrop-filter:blur(24px);
+  border:1px solid var(--border);border-radius:14px;padding:6px;
+  min-width:180px;box-shadow:0 20px 60px rgba(0,0,0,.4);
+  opacity:0;visibility:hidden;transform:translateY(-6px);transition:all .22s;z-index:200;
+}
+.tb-user:hover .user-menu{opacity:1;visibility:visible;transform:translateY(0)}
+.um-item{
+  display:flex;align-items:center;gap:9px;padding:9px 12px;
+  border-radius:9px;font-size:13px;color:rgba(255,255,255,.55);
+  cursor:pointer;transition:background .2s;text-decoration:none;
+}
+.um-item:hover{background:rgba(255,255,255,.06);color:white}
+.um-item svg{width:14px;height:14px;fill:currentColor}
+.um-sep{height:1px;background:var(--border);margin:4px 0}
+.um-item.danger{color:rgba(248,113,113,.6)}
+.um-item.danger:hover{color:#F87171}
+
+/* ── MAIN LAYOUT ── */
+.main{padding:80px 32px 60px;max-width:1200px;margin:0 auto}
+
+/* ── WELCOME STRIP ── */
+.welcome{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;
+  margin-bottom:40px;padding:28px 32px;
+  background:rgba(212,175,106,.04);border:1px solid var(--border-gold);border-radius:20px;
+}
+.welcome-text h2{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;margin-bottom:4px}
+.welcome-text p{font-size:13px;color:var(--mid)}
+.welcome-text h2 span{color:var(--gold)}
+.welcome-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn-gold{padding:10px 22px;border-radius:100px;background:var(--grad-gold);color:#0D0B18;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.btn-gold:hover{transform:scale(1.03);box-shadow:0 8px 28px rgba(212,175,106,.3)}
+.btn-gold svg{width:13px;height:13px;fill:#0D0B18}
+.btn-ghost{padding:10px 22px;border-radius:100px;background:transparent;color:rgba(255,255,255,.5);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,.12);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn-ghost:hover{border-color:rgba(255,255,255,.3);color:white}
+
+/* ── STATS STRIP ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:36px}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:20px 22px;transition:all .3s;
+}
+.stat-card:hover{border-color:var(--border-gold)}
+.stat-n{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;color:white}
+.stat-l{font-size:11px;color:var(--mid);margin-top:2px;letter-spacing:.04em;text-transform:uppercase}
+.stat-trend{font-size:11px;color:#34D399;margin-top:4px}
+
+/* ── SECTION HEADER ── */
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700}
+.sec-actions{display:flex;gap:8px}
+.filter-btn{padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;transition:all .2s}
+.filter-btn.active,.filter-btn:hover{border-color:var(--border-gold);color:var(--gold);background:rgba(212,175,106,.06)}
+
+/* ── SITES GRID ── */
+.sites-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;margin-bottom:48px}
+
+/* Site card */
+.site-card{
+  background:var(--card);border:1px solid var(--border);border-radius:20px;
+  overflow:hidden;transition:all .3s;position:relative;
+}
+.site-card:hover{transform:translateY(-4px);border-color:rgba(212,175,106,.25);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.site-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--grad-gold);transform:scaleX(0);transform-origin:left;transition:transform .3s;
+}
+.site-card:hover::before{transform:scaleX(1)}
+/* Card preview area */
+.card-preview{height:130px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.card-preview-nav{position:absolute;top:0;left:0;right:0;padding:7px 12px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.3);backdrop-filter:blur(4px)}
+.card-preview-logo{font-size:9px;font-weight:700;color:white;font-family:'Cormorant Garamond',serif}
+.card-preview-pill{font-size:7px;font-weight:700;padding:2px 7px;border-radius:100px;background:rgba(255,255,255,.15);color:white;letter-spacing:.06em;text-transform:uppercase}
+.card-preview-hero{position:absolute;bottom:0;left:0;right:0;padding:12px;text-align:center}
+.card-preview-title{font-size:13px;font-weight:700;color:white;font-family:'Cormorant Garamond',serif;margin-bottom:2px}
+.card-preview-tag{font-size:8px;color:rgba(255,255,255,.5)}
+/* Card body */
+.card-body{padding:16px 18px}
+.card-name{font-size:15px;font-weight:700;color:white;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-type{font-size:11px;color:var(--mid);margin-bottom:10px}
+.card-meta{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.card-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:3px 9px;border-radius:100px}
+.badge-live{background:rgba(52,211,153,.12);color:#34D399;border:1px solid rgba(52,211,153,.2)}
+.badge-draft{background:rgba(255,255,255,.06);color:var(--mid);border:1px solid var(--border)}
+.card-date{font-size:10px;color:var(--mid)}
+/* Card actions */
+.card-actions{display:flex;gap:6px}
+.card-btn{
+  flex:1;padding:8px;border-radius:10px;background:rgba(255,255,255,.04);
+  border:1px solid var(--border);font-size:11px;font-weight:600;
+  color:rgba(255,255,255,.5);cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:4px;
+}
+.card-btn:hover{background:rgba(255,255,255,.08);color:white;border-color:rgba(255,255,255,.2)}
+.card-btn.primary{background:rgba(212,175,106,.1);border-color:var(--border-gold);color:var(--gold)}
+.card-btn.primary:hover{background:rgba(212,175,106,.18)}
+.card-btn.danger:hover{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.2);color:#F87171}
+.card-btn svg{width:12px;height:12px;fill:currentColor}
+
+/* Empty state */
+.empty-state{
+  grid-column:1/-1;text-align:center;padding:80px 20px;
+  background:var(--card);border:1px dashed var(--border);border-radius:20px;
+}
+.empty-ico{font-size:48px;margin-bottom:16px}
+.empty-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;margin-bottom:8px}
+.empty-sub{font-size:14px;color:var(--mid);margin-bottom:28px;line-height:1.7}
+
+/* ── MODAL: confirm delete ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:500;display:none;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#1C1929;border:1px solid var(--border);border-radius:22px;padding:32px;max-width:400px;width:90%;text-align:center}
+.modal-ico{font-size:40px;margin-bottom:12px}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;margin-bottom:8px}
+.modal-sub{font-size:13px;color:var(--mid);margin-bottom:24px;line-height:1.65}
+.modal-actions{display:flex;gap:10px}
+.modal-cancel{flex:1;padding:12px;border-radius:100px;background:transparent;color:var(--mid);border:1px solid var(--border);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.modal-cancel:hover{border-color:rgba(255,255,255,.25);color:white}
+.modal-confirm{flex:1;padding:12px;border-radius:100px;background:rgba(248,113,113,.15);color:#F87171;border:1px solid rgba(248,113,113,.2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.modal-confirm:hover{background:rgba(248,113,113,.25)}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(28,25,41,.98);border:1px solid var(--border);border-radius:14px;padding:12px 20px;display:flex;align-items:center;gap:9px;font-size:13px;color:white;box-shadow:0 20px 60px rgba(0,0,0,.4);z-index:999;transition:transform .3s ease;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.site-card{animation:fadeUp .4s ease both}
+
+@media(max-width:640px){
+  .main{padding:70px 16px 40px}
+  .welcome{padding:20px}
+  .topbar{padding:0 16px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <!-- TOPBAR -->
+  <nav class="topbar">
+    <a class="tb-logo" href="Index.html">
+      <div class="tb-gem"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div>
+      <div class="tb-name">Local<span>Launch</span></div>
+    </a>
+    <div class="tb-right">
+      <button class="tb-new" onclick="goBuilder()">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        New Site
+      </button>
+      <div class="tb-user">
+        <div class="tb-av" id="tb-av">?</div>
+        <div class="tb-uname" id="tb-uname">User</div>
+        <div class="user-menu">
+          <a class="um-item" href="Index.html"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Home</a>
+          <a class="um-item" href="#" onclick="showAccountModal();return false;"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> Account</a>
+          <div class="um-sep"></div>
+          <div class="um-item danger" onclick="doLogout()"><svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg> Sign Out</div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main">
+    <!-- Welcome strip -->
+    <div class="welcome">
+      <div class="welcome-text">
+        <h2>Welcome back, <span id="w-name">there</span> 👋</h2>
+        <p id="w-sub">You have 0 sites. Start building your first one!</p>
+      </div>
+      <div class="welcome-actions">
+        <button class="btn-gold" onclick="goBuilder()">
+          <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          Build New Site
+        </button>
+        <a class="btn-ghost" href="Index.html">← Back to Home</a>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card"><div class="stat-n" id="stat-total">0</div><div class="stat-l">Sites Created</div></div>
+      <div class="stat-card"><div class="stat-n" id="stat-live">0</div><div class="stat-l">Live Sites</div><div class="stat-trend">✓ All active</div></div>
+      <div class="stat-card"><div class="stat-n" id="stat-templates">—</div><div class="stat-l">Favourite Template</div></div>
+      <div class="stat-card"><div class="stat-n" id="stat-joined">—</div><div class="stat-l">Member Since</div></div>
+    </div>
+
+    <!-- Sites -->
+    <div class="sec-head">
+      <div class="sec-title">Your Sites</div>
+      <div class="sec-actions">
+        <button class="filter-btn active" id="filter-all" onclick="setFilter('all',this)">All</button>
+        <button class="filter-btn" id="filter-live" onclick="setFilter('live',this)">Live</button>
+        <div class="sort-wrap">
+          <select id="sort-select" onchange="renderSites()" style="background:rgba(255,255,255,.04);border:1px solid rgba(167,139,250,.12);border-radius:8px;color:rgba(255,255,255,.5);font-size:11px;font-weight:600;padding:5px 10px;font-family:'DM Sans',sans-serif;cursor:pointer;outline:none;">
+            <option value="updated">Recent</option>
+            <option value="name">Name A–Z</option>
+            <option value="oldest">Oldest</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <!-- Search bar -->
+    <div style="position:relative;margin-bottom:20px;">
+      <svg viewBox="0 0 24 24" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);width:14px;height:14px;fill:rgba(255,255,255,.2);pointer-events:none"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      <input id="search-inp" type="text" placeholder="Search your sites..." oninput="renderSites()"
+        style="width:100%;padding:11px 14px 11px 38px;background:rgba(255,255,255,.04);border:1px solid rgba(167,139,250,.12);border-radius:12px;color:white;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;"
+        onfocus="this.style.borderColor='rgba(212,175,106,.35)'" onblur="this.style.borderColor='rgba(167,139,250,.12)'"/>
+    </div>
+    <div class="sites-grid" id="sites-grid"></div>
+  </div>
+</div>
+
+<!-- Delete modal -->
+<div class="modal-bg" id="del-modal">
+  <div class="modal">
+    <div class="modal-ico">🗑️</div>
+    <div class="modal-title">Delete this site?</div>
+    <div class="modal-sub">This action can't be undone. Your site and all its settings will be permanently removed.</div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-confirm" id="del-confirm-btn">Delete Site</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span id="toast-msg">Done!</span></div>
+
+<script>
+const LS = {
+  get:(k)=>{
+    if(k === 'll_session'){
+      try{ const s = JSON.parse(sessionStorage.getItem(k)); if(s) return s; }catch{}
+    }
+    try{ return JSON.parse(localStorage.getItem(k)); }catch{return null;}
+  },
+  set:(k,v)=>{ localStorage.setItem(k, JSON.stringify(v)); },
+  del:(k)=>{ localStorage.removeItem(k); sessionStorage.removeItem(k); },
+};
+
+// Auth guard
+const session = LS.get('ll_session');
+if(!session){ window.location.href = 'Auth.html?redirect=Dashboard.html'; throw new Error('Not authenticated'); }
+
+const TEMPLATE_NAMES = ["Obsidian","Pearl","Ember","Glacier","Sage","Rose","Neon","Gold","Nordic","Violet"];
+const TEMPLATE_GRADS = [
+  "linear-gradient(135deg,#0D0B18,#1C1929)",
+  "linear-gradient(135deg,#F9FAFB,#EDE9FE)",
+  "linear-gradient(135deg,#FFF7ED,#FEF3C7)",
+  "linear-gradient(135deg,#EFF6FF,#DBEAFE)",
+  "linear-gradient(135deg,#ECFDF5,#D1FAE5)",
+  "linear-gradient(135deg,#FFF1F2,#FFE4E6)",
+  "linear-gradient(135deg,#09090B,#18181B)",
+  "linear-gradient(135deg,#1A1400,#2D2200)",
+  "linear-gradient(135deg,#FAFAFA,#F3F4F6)",
+  "linear-gradient(135deg,#F5F3FF,#EDE9FE)",
+];
+const TEMPLATE_ACCENTS = ["#A78BFA","#7C3AED","#D97706","#2563EB","#059669","#E11D48","#22D3EE","#D4AF6A","#374151","#8B5CF6"];
+
+let currentFilter = 'all';
+let pendingDeleteId = null;
+
+function getSites(){
+  return (LS.get('ll_sites_' + session.id) || []).sort((a,b)=>b.updatedAt-a.updatedAt);
+}
+function saveSites(sites){ LS.set('ll_sites_' + session.id, sites); }
+
+function goBuilder(){
+  window.location.href = 'Questionnaire.html';
+}
+
+function doLogout(){
+  LS.del('ll_session');
+  window.location.href = 'Index.html';
+}
+
+function setFilter(f, btn){
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSites();
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+function openDeleteModal(id){
+  pendingDeleteId = id;
+  document.getElementById('del-modal').classList.add('open');
+  document.getElementById('del-confirm-btn').onclick = () => confirmDelete(id);
+}
+function closeModal(){ document.getElementById('del-modal').classList.remove('open'); pendingDeleteId=null; }
+
+function confirmDelete(id){
+  const sites = getSites().filter(s => s.id !== id);
+  saveSites(sites);
+  closeModal();
+  renderAll();
+  showToast('Site deleted.');
+}
+
+function getSiteById(id){ return getSites().find(s=>s.id===id); }
+
+function editSite(id){
+  const site = getSiteById(id); if(!site) return;
+  LS.set('ll_edit_site', site);
+  if(site.logo) sessionStorage.setItem('ll_logo', site.logo);
+  window.location.href = 'Questionnaire.html?edit=' + site.id;
+}
+
+function viewSite(id){
+  const site = getSiteById(id); if(!site) return;
+  if(site.logo) sessionStorage.setItem('ll_logo', site.logo);
+  window.location.href = 'LocalLaunch-site.html?' + site.params + '&siteId=' + site.id;
+}
+
+function duplicateSite(id){
+  const site = getSiteById(id); if(!site) return;
+  const sites = getSites();
+  const copy = {...site, id:'s_'+Date.now(), name:site.name+' (Copy)', createdAt:Date.now(), updatedAt:Date.now()};
+  const copyParams = new URLSearchParams(site.params);
+  copyParams.set('name', copy.name);
+  copy.params = copyParams.toString();
+  sites.unshift(copy);
+  saveSites(sites);
+  renderAll();
+  showToast('✦ Site duplicated!');
+}
+
+function shareSite(id){
+  const site = getSiteById(id); if(!site) return;
+  // Share the real working URL with all params
+  const shareUrl = window.location.origin + window.location.pathname.replace('Dashboard.html','') +
+    'LocalLaunch-Site.html?' + site.params + '&siteId=' + site.id;
+  navigator.clipboard.writeText(shareUrl)
+    .then(()=>showToast('✦ Site link copied to clipboard!'))
+    .catch(()=>{ prompt('Copy this link:', shareUrl); });
+}
+
+function renameSite(id, btn){
+  const site = getSiteById(id); if(!site) return;
+  const card = btn.closest('.site-card');
+  const nameEl = card.querySelector('.card-name');
+  const oldName = site.name;
+  // Replace card-name with inline input
+  nameEl.innerHTML = '';
+  const inp = document.createElement('input');
+  inp.value = oldName;
+  inp.style.cssText = 'background:rgba(255,255,255,.08);border:1px solid rgba(212,175,106,.4);border-radius:6px;padding:3px 8px;color:white;font-size:14px;font-weight:700;width:100%;font-family:inherit;outline:none;';
+  nameEl.appendChild(inp);
+  inp.focus(); inp.select();
+  const save = () => {
+    const newName = inp.value.trim() || oldName;
+    const sites = getSites();
+    const idx = sites.findIndex(s=>s.id===id);
+    if(idx>-1){
+      const p = new URLSearchParams(sites[idx].params);
+      p.set('name', newName);
+      sites[idx].name = newName;
+      sites[idx].params = p.toString();
+      sites[idx].updatedAt = Date.now();
+      saveSites(sites);
+    }
+    renderAll();
+    showToast('Site renamed to "' + newName + '"');
+  };
+  inp.addEventListener('blur', save);
+  inp.addEventListener('keydown', e=>{ if(e.key==='Enter') inp.blur(); if(e.key==='Escape'){ inp.value=oldName; inp.blur(); } });
+}
+
+function timeAgo(ts){
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff/60000);
+  if(m < 1) return 'just now';
+  if(m < 60) return m + 'm ago';
+  const h = Math.floor(m/60);
+  if(h < 24) return h + 'h ago';
+  const d = Math.floor(h/24);
+  return d + 'd ago';
+}
+
+function renderSites(){
+  const grid = document.getElementById('sites-grid');
+  let sites = getSites();
+  // Filter
+  if(currentFilter === 'live') sites = sites.filter(s=>s.status==='live');
+  // Search
+  const q = (document.getElementById('search-inp')||{}).value || '';
+  if(q.trim()) sites = sites.filter(s => (s.name||'').toLowerCase().includes(q.toLowerCase()) || (s.type||'').toLowerCase().includes(q.toLowerCase()));
+  // Sort
+  const sortVal = (document.getElementById('sort-select')||{}).value || 'updated';
+  if(sortVal==='name') sites.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  else if(sortVal==='oldest') sites.sort((a,b)=>a.createdAt-b.createdAt);
+  // else: already sorted by updatedAt from getSites()
+
+  if(sites.length === 0){
+    const msg = currentFilter==='all'
+      ? '<div class="empty-ico">🚀</div><div class="empty-title">No sites yet</div><div class="empty-sub">Build your first site in 60 seconds.<br>No code, no designers, no waiting.</div><button class="btn-gold" onclick="goBuilder()"><svg viewBox="0 0 24 24" width="13" height="13" fill="#0D0B18"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Build My First Site</button>'
+      : '<div class="empty-ico">🔍</div><div class="empty-title">No '+(currentFilter==='live'?'live':'draft')+' sites</div><div class="empty-sub">Nothing here yet.</div>';
+    grid.innerHTML = '<div class="empty-state">' + msg + '</div>';
+    return;
+  }
+
+  grid.innerHTML = sites.map((site,i) => {
+    const tpl = site.template || 0;
+    const grad = TEMPLATE_GRADS[tpl] || TEMPLATE_GRADS[0];
+    const accent = TEMPLATE_ACCENTS[tpl] || '#A78BFA';
+    const tplName = TEMPLATE_NAMES[tpl] || 'Custom';
+    const isLive = site.status === 'live';
+    return `<div class="site-card" style="animation-delay:${i*.06}s">
+      <div class="card-preview" style="background:${grad}">
+        <div class="card-preview-nav">
+          <div class="card-preview-logo" style="color:${accent}">${site.name}</div>
+          <div class="card-preview-pill" style="background:${accent}22;color:${accent}">${tplName}</div>
+        </div>
+        <div class="card-preview-hero">
+          <div class="card-preview-title" style="color:${accent}">${site.type||'Business'}</div>
+          <div class="card-preview-tag" style="color:rgba(255,255,255,.4)">${site.name}</div>
+        </div>
+        ${site.logo ? `<img src="${site.logo}" style="position:absolute;top:8px;left:50%;transform:translateX(-50%);max-height:30px;max-width:80px;object-fit:contain;opacity:.85"/>` : ''}
+      </div>
+      <div class="card-body">
+        <div class="card-name">${site.name}</div>
+        <div class="card-type">${site.type||'Business'} · ${tplName} template</div>
+        <div class="card-meta">
+          <span class="card-badge ${isLive?'badge-live':'badge-draft'}">${isLive?'● Live':'○ Draft'}</span>
+          <span class="card-date">Updated ${timeAgo(site.updatedAt)}</span>
+        </div>
+        <div class="card-actions">
+          <button class="card-btn primary" onclick="viewSite('${site.id}')">
+            <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg> View
+          </button>
+          <button class="card-btn" onclick="editSite('${site.id}')">
+            <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg> Edit
+          </button>
+          <button class="card-btn" onclick="shareSite('${site.id}')">
+            <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+          </button>
+          <button class="card-btn danger" onclick="openDeleteModal('${site.id}')">
+            <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAll(){
+  const sites = getSites();
+  const firstName = session.name ? session.name.split(' ')[0] : 'there';
+
+  // Nav
+  document.getElementById('tb-av').textContent = session.name ? session.name.slice(0,2).toUpperCase() : '??';
+  document.getElementById('tb-uname').textContent = firstName;
+
+  // Welcome
+  document.getElementById('w-name').textContent = firstName;
+  document.getElementById('w-sub').textContent = sites.length === 0
+    ? "You have no sites yet. Start building your first one!"
+    : `You have ${sites.length} site${sites.length>1?'s':''} — keep building! 🚀`;
+
+  // Stats
+  document.getElementById('stat-total').textContent = sites.length;
+  document.getElementById('stat-live').textContent = sites.filter(s=>s.status==='live').length;
+
+  // Favourite template
+  if(sites.length > 0){
+    const tplCount = {};
+    sites.forEach(s=>{ tplCount[s.template||0] = (tplCount[s.template||0]||0)+1; });
+    const favTpl = Object.entries(tplCount).sort((a,b)=>b[1]-a[1])[0][0];
+    document.getElementById('stat-templates').textContent = TEMPLATE_NAMES[parseInt(favTpl)]||'—';
+  }
+
+  // Joined date
+  const users = LS.get('ll_users') || [];
+  const user = users.find(u=>u.id===session.id);
+  if(user){ document.getElementById('stat-joined').textContent = new Date(user.createdAt).toLocaleDateString('en',{month:'short',year:'numeric'}); }
+
+  renderSites();
+  checkStorageUsage();
+  checkNewUser();
+}
+
+function checkStorageUsage(){
+  try {
+    let total = 0;
+    for(let k in localStorage){ if(localStorage.hasOwnProperty(k)) total += (localStorage[k]||'').length; }
+    const usedMB = (total * 2 / 1024 / 1024).toFixed(1); // UTF-16 = 2 bytes/char
+    if(usedMB > 3.5){
+      showWarning(`⚠️ Storage is ${usedMB}MB / ~5MB limit. Delete unused sites or remove logo images to free space.`);
+    }
+  } catch(e){}
+}
+
+function showWarning(msg){
+  let w = document.getElementById('storage-warn');
+  if(!w){
+    w = document.createElement('div');
+    w.id = 'storage-warn';
+    w.style.cssText = 'background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:12px;padding:12px 18px;font-size:12px;color:#FCD34D;margin-bottom:20px;display:flex;align-items:center;gap:10px;';
+    document.querySelector('.main').insertBefore(w, document.getElementById('stats-row').nextSibling);
+  }
+  w.innerHTML = msg + ' <button onclick="this.parentElement.remove()" style="margin-left:auto;background:none;border:none;color:#FCD34D;cursor:pointer;font-size:16px;line-height:1">×</button>';
+}
+
+let _accountModalAdded = false;
+function showAccountModal(){
+  if(!_accountModalAdded){
+    _accountModalAdded = true;
+    const m = document.createElement('div');
+    m.id = 'acct-modal-bg';
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:500;display:flex;align-items:center;justify-content:center;';
+    m.innerHTML = `<div style="background:#1C1929;border:1px solid rgba(167,139,250,.12);border-radius:22px;padding:32px;max-width:380px;width:90%;">
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;margin-bottom:6px">Account</h3>
+      <p style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:20px">Manage your LocalLaunch profile</p>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(167,139,250,.12);border-radius:12px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:600;color:white;margin-bottom:2px" id="acct-name">${session.name}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4)" id="acct-email">${session.email}</div>
+      </div>
+      <p style="font-size:11px;color:rgba(255,255,255,.3);margin-bottom:20px;text-align:center">Profile editing & password change coming soon.</p>
+      <div style="display:flex;gap:10px;">
+        <button onclick="document.getElementById('acct-modal-bg').remove();_accountModalAdded=false;" style="flex:1;padding:11px;border-radius:100px;background:transparent;color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.1);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">Close</button>
+        <button onclick="doLogout()" style="flex:1;padding:11px;border-radius:100px;background:rgba(248,113,113,.12);color:#F87171;border:1px solid rgba(248,113,113,.2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Sign Out</button>
+      </div>
+    </div>`;
+    document.body.appendChild(m);
+    m.addEventListener('click', e=>{ if(e.target===m){ m.remove(); _accountModalAdded=false; } });
+  }
+}
+
+function checkNewUser(){
+  const flag = sessionStorage.getItem('ll_new_user');
+  if(flag === '1'){
+    sessionStorage.removeItem('ll_new_user');
+    // Confetti-style welcome toast
+    setTimeout(()=>{
+      const t = document.getElementById('toast');
+      const tm = document.getElementById('toast-msg');
+      tm.innerHTML = '🎉 Welcome to LocalLaunch, ' + (session.name?session.name.split(' ')[0]:'friend') + '! Build your first site now.';
+      t.classList.add('show');
+      t.style.background = 'linear-gradient(135deg,rgba(124,58,237,.3),rgba(28,25,41,.98))';
+      t.style.borderColor = 'rgba(167,139,250,.3)';
+      setTimeout(()=>{ t.classList.remove('show'); t.style.background=''; t.style.borderColor=''; }, 5000);
+    }, 600);
+  }
+}
+
+renderAll();
+</script>
+</body>
+</html>

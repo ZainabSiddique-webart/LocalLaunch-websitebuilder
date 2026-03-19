@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LocalLaunch — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0D0B18;--ink2:#1C1929;--ink3:#2D2A3E;
+  --gold:#D4AF6A;--gold2:#F5D58A;
+  --lav:#A78BFA;--purple:#7C3AED;
+  --border:rgba(167,139,250,.12);--border-gold:rgba(212,175,106,.18);
+  --mid:rgba(255,255,255,.4);--white:#fff;
+  --grad-gold:linear-gradient(135deg,#D4AF6A,#F5D58A);
+  --err:#F87171;--ok:#34D399;
+}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:white;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(212,175,106,.2);border-radius:4px}
+
+/* ── BACKGROUND ── */
+.page-bg{position:fixed;inset:0;pointer-events:none;z-index:0}
+.bg-orb{position:absolute;border-radius:50%;filter:blur(90px);animation:drift 12s ease-in-out infinite}
+.bg-orb-1{width:500px;height:500px;background:rgba(124,58,237,.15);top:-150px;left:-150px}
+.bg-orb-2{width:400px;height:400px;background:rgba(212,175,106,.08);bottom:-100px;right:-100px;animation-delay:5s}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(167,139,250,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(167,139,250,.03) 1px,transparent 1px);background-size:44px 44px}
+@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-30px)}}
+
+/* ── LAYOUT ── */
+.wrapper{position:relative;z-index:1;min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+@media(max-width:860px){.wrapper{grid-template-columns:1fr}.side-art{display:none}}
+
+/* ── LEFT: ART PANEL ── */
+.side-art{
+  position:relative;display:flex;flex-direction:column;justify-content:space-between;
+  padding:40px 48px;background:rgba(255,255,255,.015);
+  border-right:1px solid var(--border);overflow:hidden;
+}
+.art-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.art-gem{width:36px;height:36px;border-radius:10px;background:var(--grad-gold);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(212,175,106,.3)}
+.art-gem svg{width:16px;height:16px;fill:#0D0B18}
+.art-wordmark{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:700;color:white}
+.art-wordmark span{color:var(--gold)}
+.art-mid{flex:1;display:flex;flex-direction:column;justify-content:center;padding:40px 0}
+.art-headline{font-family:'Cormorant Garamond',serif;font-size:46px;font-weight:700;line-height:1.1;margin-bottom:18px}
+.art-headline em{font-style:italic;color:transparent;background:var(--grad-gold);-webkit-background-clip:text;background-clip:text}
+.art-sub{font-size:15px;color:var(--mid);line-height:1.75;max-width:380px;margin-bottom:40px}
+.art-stats{display:flex;gap:32px}
+.art-stat .n{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;color:white}
+.art-stat .l{font-size:11px;color:var(--mid);margin-top:2px;letter-spacing:.04em}
+/* Floating site card mockup */
+.art-card{
+  background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;
+  padding:22px 24px;margin-top:40px;max-width:360px;
+}
+.art-card-bar{display:flex;gap:5px;margin-bottom:14px}
+.art-card-dot{width:8px;height:8px;border-radius:50%}
+.art-card-line{height:3px;border-radius:2px;margin-bottom:6px;opacity:.5}
+.art-card-chip{display:inline-block;padding:3px 10px;border-radius:6px;font-size:9px;font-weight:700;margin-top:8px}
+.art-testimonial{margin-top:auto;padding-top:20px;border-top:1px solid var(--border)}
+.art-quote{font-size:13px;color:var(--mid);line-height:1.75;font-style:italic;margin-bottom:12px}
+.art-author{display:flex;align-items:center;gap:10px}
+.art-av{width:32px;height:32px;border-radius:50%;background:var(--grad-gold);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0D0B18}
+.art-aname{font-size:12px;font-weight:600;color:white}
+.art-abiz{font-size:10px;color:var(--mid)}
+
+/* ── RIGHT: FORM PANEL ── */
+.side-form{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 40px;min-height:100vh;
+}
+.form-inner{width:100%;max-width:420px}
+
+/* Tab switcher */
+.tab-row{
+  display:flex;background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:14px;padding:4px;margin-bottom:36px;
+}
+.tab-btn{
+  flex:1;padding:10px;border-radius:10px;border:none;background:transparent;
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+  color:var(--mid);cursor:pointer;transition:all .25s;
+}
+.tab-btn.active{background:rgba(212,175,106,.1);color:var(--gold);border:1px solid var(--border-gold)}
+
+.form-title{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;margin-bottom:6px}
+.form-sub{font-size:13px;color:var(--mid);margin-bottom:30px}
+
+/* Form fields */
+.field{margin-bottom:18px}
+.field label{display:block;font-size:12px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.field-wrap{position:relative}
+.field-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none}
+.field-ico svg{width:15px;height:15px;fill:rgba(255,255,255,.2)}
+.inp{
+  width:100%;padding:13px 14px 13px 42px;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;
+  font-family:'DM Sans',sans-serif;font-size:14px;color:white;
+  transition:all .25s;outline:none;
+}
+.inp::placeholder{color:rgba(255,255,255,.2)}
+.inp:focus{border-color:rgba(212,175,106,.4);background:rgba(212,175,106,.04);box-shadow:0 0 0 3px rgba(212,175,106,.06)}
+.inp.err{border-color:var(--err);background:rgba(248,113,113,.04)}
+.inp.ok{border-color:rgba(52,211,153,.3)}
+.field-err{font-size:11px;color:var(--err);margin-top:5px;display:none}
+.field-err.show{display:block}
+
+/* Password toggle */
+.pw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:2px}
+.pw-toggle svg{width:15px;height:15px;fill:rgba(255,255,255,.25);transition:fill .2s}
+.pw-toggle:hover svg{fill:var(--gold)}
+
+/* Strength bar */
+.pw-strength{margin-top:8px;display:none}
+.pw-strength.show{display:block}
+.pw-strength-bar{height:3px;border-radius:2px;background:rgba(255,255,255,.08);margin-bottom:4px}
+.pw-strength-fill{height:100%;border-radius:2px;transition:all .3s;width:0%}
+.pw-strength-label{font-size:10px;color:var(--mid)}
+
+/* Remember / forgot */
+.form-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.checkbox-row{display:flex;align-items:center;gap:8px;cursor:pointer}
+.checkbox-row input{appearance:none;width:15px;height:15px;border-radius:4px;background:rgba(255,255,255,.06);border:1px solid var(--border);cursor:pointer;transition:all .2s;position:relative}
+.checkbox-row input:checked{background:var(--gold);border-color:var(--gold)}
+.checkbox-row input:checked::after{content:"✓";position:absolute;color:#0D0B18;font-size:10px;font-weight:700;top:50%;left:50%;transform:translate(-50%,-50%)}
+.checkbox-row span{font-size:12px;color:var(--mid)}
+.forgot-link{font-size:12px;color:var(--gold);text-decoration:none;opacity:.8}
+.forgot-link:hover{opacity:1}
+
+/* Submit button */
+.submit-btn{
+  width:100%;padding:14px;border-radius:100px;
+  background:var(--grad-gold);color:#0D0B18;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;
+  border:none;cursor:pointer;transition:all .25s;letter-spacing:.04em;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-bottom:22px;
+}
+.submit-btn:hover{transform:scale(1.02);box-shadow:0 12px 40px rgba(212,175,106,.35)}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.submit-btn svg{width:15px;height:15px;fill:#0D0B18}
+
+/* Divider */
+.or-row{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.or-line{flex:1;height:1px;background:var(--border)}
+.or-text{font-size:11px;color:var(--mid);flex-shrink:0}
+
+/* Social buttons */
+.social-row{display:flex;gap:10px;margin-bottom:28px}
+.social-btn{
+  flex:1;padding:11px;border-radius:12px;background:rgba(255,255,255,.04);
+  border:1px solid var(--border);cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:rgba(255,255,255,.6);
+}
+.social-btn:hover{border-color:rgba(255,255,255,.2);color:white;background:rgba(255,255,255,.07)}
+.social-btn svg{width:16px;height:16px}
+
+/* Switch prompt */
+.switch-prompt{text-align:center;font-size:13px;color:var(--mid)}
+.switch-link{color:var(--gold);cursor:pointer;font-weight:600}
+.switch-link:hover{text-decoration:underline}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:rgba(28,25,41,.98);border:1px solid var(--border);border-radius:14px;
+  padding:14px 22px;display:flex;align-items:center;gap:10px;
+  font-size:13px;font-weight:500;color:white;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);z-index:999;transition:transform .35s ease;
+  white-space:nowrap;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast-ico{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.toast-ok{background:rgba(52,211,153,.15)}
+.toast-ok svg{fill:#34D399}
+.toast-err{background:rgba(248,113,113,.15)}
+.toast-err svg{fill:#F87171}
+
+/* Loading spinner */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:#0D0B18;border-radius:50%;animation:spin .7s linear infinite}
+
+/* Fade anim */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.form-inner{animation:fadeUp .5s ease both}
+</style>
+</head>
+<body>
+<div class="page-bg">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-grid"></div>
+</div>
+
+<div class="wrapper">
+  <!-- LEFT ART PANEL -->
+  <div class="side-art">
+    <a class="art-logo" href="Index.html">
+      <div class="art-gem"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div>
+      <div class="art-wordmark">Local<span>Launch</span></div>
+    </a>
+    <div class="art-mid">
+      <h1 class="art-headline">Build your site.<br><em>Own your story.</em></h1>
+      <p class="art-sub">One account. Unlimited websites. All your sites saved, editable, and shareable — forever.</p>
+      <div class="art-stats">
+        <div class="art-stat"><div class="n">10K+</div><div class="l">SITES BUILT</div></div>
+        <div class="art-stat"><div class="n">60s</div><div class="l">BUILD TIME</div></div>
+        <div class="art-stat"><div class="n">Free</div><div class="l">FOREVER</div></div>
+      </div>
+      <div class="art-card">
+        <div class="art-card-bar">
+          <div class="art-card-dot" style="background:#FF5F56"></div>
+          <div class="art-card-dot" style="background:#FFBD2E"></div>
+          <div class="art-card-dot" style="background:#27C93F"></div>
+        </div>
+        <div class="art-card-line" style="background:#A78BFA;width:55%"></div>
+        <div class="art-card-line" style="background:rgba(255,255,255,.15);width:80%"></div>
+        <div class="art-card-line" style="background:rgba(255,255,255,.15);width:65%"></div>
+        <div class="art-card-chip" style="background:rgba(212,175,106,.15);color:#D4AF6A">✦ Live</div>
+      </div>
+    </div>
+    <div class="art-testimonial">
+      <div class="art-quote">"I had my full business website up in under 2 minutes. My customers keep asking who built it."</div>
+      <div class="art-author">
+        <div class="art-av">MS</div>
+        <div><div class="art-aname">Maria Santos</div><div class="art-abiz">Bloom Bakery, Manila</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT FORM PANEL -->
+  <div class="side-form">
+    <div class="form-inner" id="form-inner">
+      <!-- Tab row -->
+      <div class="tab-row">
+        <button class="tab-btn active" id="tab-signin" onclick="switchTab('signin')">Sign In</button>
+        <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Create Account</button>
+      </div>
+
+      <!-- SIGN IN FORM -->
+      <div id="panel-signin">
+        <h2 class="form-title">Welcome back.</h2>
+        <p class="form-sub">Sign in to access your sites and dashboard.</p>
+
+        <div class="field">
+          <label>Email Address</label>
+          <div class="field-wrap">
+            <span class="field-ico"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></span>
+            <input class="inp" id="si-email" type="email" placeholder="you@example.com" autocomplete="email"/>
+          </div>
+          <div class="field-err" id="si-email-err">Please enter a valid email.</div>
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+          <div class="field-wrap">
+            <span class="field-ico"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></span>
+            <input class="inp" id="si-password" type="password" placeholder="Your password" autocomplete="current-password"/>
+            <button class="pw-toggle" type="button" onclick="togglePw('si-password',this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></button>
+          </div>
+          <div class="field-err" id="si-pw-err">Incorrect password.</div>
+        </div>
+
+        <div class="form-row">
+          <label class="checkbox-row"><input type="checkbox" id="si-remember" checked/><span>Remember me</span></label>
+          <a class="forgot-link" href="#" onclick="showForgot()">Forgot password?</a>
+        </div>
+
+        <button class="submit-btn" id="si-btn" onclick="doSignIn()">
+          Sign In
+          <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+        </button>
+
+        <div class="or-row"><div class="or-line"></div><div class="or-text">or continue with</div><div class="or-line"></div></div>
+        <div class="social-row">
+          <button class="social-btn" onclick="socialDemo('Google')">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Google
+          </button>
+          <button class="social-btn" onclick="socialDemo('GitHub')">
+            <svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+            GitHub
+          </button>
+        </div>
+
+        <div class="switch-prompt">Don't have an account? <span class="switch-link" onclick="switchTab('signup')">Create one free →</span></div>
+      </div>
+
+      <!-- SIGN UP FORM -->
+      <div id="panel-signup" style="display:none">
+        <h2 class="form-title">Join LocalLaunch.</h2>
+        <p class="form-sub">Create your free account and start building in 60 seconds.</p>
+
+        <div class="field">
+          <label>Full Name</label>
+          <div class="field-wrap">
+            <span class="field-ico"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></span>
+            <input class="inp" id="su-name" type="text" placeholder="Your full name" autocomplete="name"/>
+          </div>
+          <div class="field-err" id="su-name-err">Please enter your name.</div>
+        </div>
+
+        <div class="field">
+          <label>Email Address</label>
+          <div class="field-wrap">
+            <span class="field-ico"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></span>
+            <input class="inp" id="su-email" type="email" placeholder="you@example.com" autocomplete="email"/>
+          </div>
+          <div class="field-err" id="su-email-err">Please enter a valid email.</div>
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+          <div class="field-wrap">
+            <span class="field-ico"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></span>
+            <input class="inp" id="su-password" type="password" placeholder="Choose a strong password" autocomplete="new-password" oninput="checkStrength(this.value)"/>
+            <button class="pw-toggle" type="button" onclick="togglePw('su-password',this)"><svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></button>
+          </div>
+          <div class="field-err" id="su-pw-err">Password must be at least 6 characters.</div>
+          <div class="pw-strength" id="pw-strength">
+            <div class="pw-strength-bar"><div class="pw-strength-fill" id="pw-fill"></div></div>
+            <div class="pw-strength-label" id="pw-label">Weak</div>
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom:22px">
+          <label>Confirm Password</label>
+          <div class="field-wrap">
+            <span class="field-ico"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></span>
+            <input class="inp" id="su-confirm" type="password" placeholder="Repeat your password" autocomplete="new-password"/>
+          </div>
+          <div class="field-err" id="su-confirm-err">Passwords don't match.</div>
+        </div>
+
+        <button class="submit-btn" id="su-btn" onclick="doSignUp()">
+          Create Free Account
+          <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+        </button>
+
+        <div class="or-row"><div class="or-line"></div><div class="or-text">or continue with</div><div class="or-line"></div></div>
+        <div class="social-row">
+          <button class="social-btn" onclick="socialDemo('Google')">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Google
+          </button>
+          <button class="social-btn" onclick="socialDemo('GitHub')">
+            <svg viewBox="0 0 24 24" fill="white"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+            GitHub
+          </button>
+        </div>
+
+        <div class="switch-prompt">Already have an account? <span class="switch-link" onclick="switchTab('signin')">Sign in →</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-ico" id="toast-ico"><svg viewBox="0 0 24 24" width="12" height="12"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+  <span id="toast-msg">Success!</span>
+</div>
+
+<script>
+/* ── HELPERS ─────────────────────────────────────────── */
+const LS = {
+  get:(k)=>{
+    if(k === 'll_session'){
+      try{ const s = JSON.parse(sessionStorage.getItem(k)); if(s) return s; }catch{}
+    }
+    try{ return JSON.parse(localStorage.getItem(k)); }catch{return null;}
+  },
+  set:(k,v)=>{ localStorage.setItem(k, JSON.stringify(v)); },
+};
+
+// Redirect destination after login
+const params = new URLSearchParams(window.location.search);
+const raw = params.get('redirect') || 'Dashboard.html';
+const REDIRECT = (raw.startsWith('http') || raw.startsWith('//') || raw.startsWith('data:')) ? 'Dashboard.html' : raw;
+const TAB = params.get('tab') || 'signin';
+
+// If already logged in, go straight to dashboard
+const _existingSession = LS.get('ll_session');
+if(_existingSession){
+  // Check session not expired
+  if(!_existingSession.expiresAt || _existingSession.expiresAt > Date.now()){
+    window.location.href = REDIRECT;
+  } else {
+    // Session expired — clean it up
+    localStorage.removeItem('ll_session'); sessionStorage.removeItem('ll_session');
+  }
+}
+
+// Set initial tab from URL param
+if(TAB === 'signup') switchTab('signup');
+
+function switchTab(tab){
+  document.getElementById('panel-signin').style.display = tab==='signin' ? '' : 'none';
+  document.getElementById('panel-signup').style.display = tab==='signup' ? '' : 'none';
+  document.getElementById('tab-signin').className = 'tab-btn' + (tab==='signin' ? ' active' : '');
+  document.getElementById('tab-signup').className = 'tab-btn' + (tab==='signup' ? ' active' : '');
+}
+
+function togglePw(id, btn){
+  const inp = document.getElementById(id);
+  const isText = inp.type === 'text';
+  inp.type = isText ? 'password' : 'text';
+  btn.querySelector('svg path').setAttribute('d', isText
+    ? 'M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z'
+    : 'M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z'
+  );
+}
+
+function checkStrength(pw){
+  const el = document.getElementById('pw-strength');
+  const fill = document.getElementById('pw-fill');
+  const label = document.getElementById('pw-label');
+  el.classList.toggle('show', pw.length > 0);
+  let score = 0;
+  if(pw.length >= 6) score++;
+  if(pw.length >= 10) score++;
+  if(/[A-Z]/.test(pw)) score++;
+  if(/[0-9]/.test(pw)) score++;
+  if(/[^A-Za-z0-9]/.test(pw)) score++;
+  const levels = [{w:'20%',c:'#F87171',t:'Weak'},{w:'40%',c:'#FB923C',t:'Fair'},{w:'60%',c:'#FBBF24',t:'Good'},{w:'80%',c:'#34D399',t:'Strong'},{w:'100%',c:'#10B981',t:'Excellent'}];
+  const lvl = levels[Math.min(score-1,4)] || levels[0];
+  fill.style.width = lvl.w; fill.style.background = lvl.c; label.textContent = lvl.t; label.style.color = lvl.c;
+}
+
+function showErr(id, show){
+  document.getElementById(id).classList.toggle('show', show);
+}
+
+function showToast(msg, ok=true){
+  const t = document.getElementById('toast');
+  const ico = document.getElementById('toast-ico');
+  const m = document.getElementById('toast-msg');
+  m.textContent = msg;
+  ico.className = 'toast-ico ' + (ok ? 'toast-ok' : 'toast-err');
+  ico.innerHTML = ok
+    ? '<svg viewBox="0 0 24 24" width="12" height="12" fill="#34D399"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>'
+    : '<svg viewBox="0 0 24 24" width="12" height="12" fill="#F87171"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3500);
+}
+
+// Simple hash (obfuscation, not real crypto — fine for localStorage demo)
+function hashPw(pw){ let h=0;for(let i=0;i<pw.length;i++){h=((h<<5)-h)+pw.charCodeAt(i);h|=0;}return h.toString(36); }
+
+function doSignIn(){
+  const email = document.getElementById('si-email').value.trim().toLowerCase();
+  const pw    = document.getElementById('si-password').value;
+  let valid = true;
+  if(!email || !/\S+@\S+\.\S+/.test(email)){ showErr('si-email-err',true); document.getElementById('si-email').classList.add('err'); valid=false; }
+  else { showErr('si-email-err',false); document.getElementById('si-email').classList.remove('err'); }
+
+  if(!pw){ showErr('si-pw-err',true); document.getElementById('si-password').classList.add('err'); valid=false; }
+  else { showErr('si-pw-err',false); document.getElementById('si-password').classList.remove('err'); }
+  if(!valid) return;
+
+  const btn = document.getElementById('si-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Signing in...';
+
+  setTimeout(()=>{
+    const users = LS.get('ll_users') || [];
+    const user = users.find(u => u.email === email);
+    if(!user || user.password !== hashPw(pw)){
+      document.getElementById('si-password').classList.add('err');
+      showErr('si-pw-err',true);
+      document.getElementById('si-pw-err').textContent = 'Email or password is incorrect.';
+      btn.disabled = false;
+      btn.innerHTML = 'Sign In <svg viewBox="0 0 24 24" width="15" height="15" fill="#0D0B18"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>';
+      return;
+    }
+    // Save session
+    const rememberMe = document.getElementById('si-remember').checked;
+    const sessionData = {id: user.id, name: user.name, email: user.email, expiresAt: rememberMe ? null : (Date.now() + 86400000)};
+    if(rememberMe){ LS.set('ll_session', sessionData); }
+    else { sessionStorage.setItem('ll_session', JSON.stringify(sessionData)); }
+    showToast('Welcome back, ' + user.name.split(' ')[0] + '!');
+    setTimeout(()=>{ window.location.href = REDIRECT; }, 900);
+  }, 1000);
+}
+
+function doSignUp(){
+  const name    = document.getElementById('su-name').value.trim();
+  const email   = document.getElementById('su-email').value.trim().toLowerCase();
+  const pw      = document.getElementById('su-password').value;
+  const confirm = document.getElementById('su-confirm').value;
+  let valid = true;
+
+  if(!name){ showErr('su-name-err',true); document.getElementById('su-name').classList.add('err'); valid=false; }
+  else { showErr('su-name-err',false); document.getElementById('su-name').classList.remove('err'); }
+
+  if(!email || !/\S+@\S+\.\S+/.test(email)){ showErr('su-email-err',true); document.getElementById('su-email').classList.add('err'); valid=false; }
+  else { showErr('su-email-err',false); document.getElementById('su-email').classList.remove('err'); }
+
+  if(pw.length < 6){ showErr('su-pw-err',true); document.getElementById('su-password').classList.add('err'); valid=false; }
+  else { showErr('su-pw-err',false); document.getElementById('su-password').classList.remove('err'); }
+
+  if(pw !== confirm){ showErr('su-confirm-err',true); document.getElementById('su-confirm').classList.add('err'); valid=false; }
+  else { showErr('su-confirm-err',false); document.getElementById('su-confirm').classList.remove('err'); }
+  if(!valid) return;
+
+  const btn = document.getElementById('su-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Creating account...';
+
+  setTimeout(()=>{
+    const users = LS.get('ll_users') || [];
+    if(users.find(u => u.email.toLowerCase() === email.toLowerCase())){
+      showErr('su-email-err', true);
+      document.getElementById('su-email-err').textContent = 'This email is already registered.';
+      document.getElementById('su-email').classList.add('err');
+      btn.disabled = false;
+      btn.innerHTML = 'Create Free Account <svg viewBox="0 0 24 24" width="15" height="15" fill="#0D0B18"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>';
+      return;
+    }
+    const newUser = { id: 'u_' + Date.now(), name, email, password: hashPw(pw), createdAt: Date.now() };
+    users.push(newUser);
+    LS.set('ll_users', users);
+    LS.set('ll_session', {id: newUser.id, name, email});
+    LS.set('ll_sites_' + newUser.id, []);
+    sessionStorage.setItem('ll_new_user', '1');
+    showToast('Account created! Welcome, ' + name.split(' ')[0] + ' 🎉');
+    setTimeout(()=>{ window.location.href = REDIRECT; }, 900);
+  }, 1200);
+}
+
+function socialDemo(provider){
+  showToast(provider + ' login coming soon — use email for now!', false);
+}
+
+function showForgot(){
+  const email = document.getElementById('si-email').value.trim();
+  if(email){ showToast('Password reset sent to ' + email + ' (demo mode)'); }
+  else { showToast('Enter your email first, then try again.', false); }
+}
+
+// Enter key support
+document.addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    const isSignin = document.getElementById('panel-signin').style.display !== 'none';
+    if(isSignin) doSignIn(); else doSignUp();
+  }
+});
+</script>
+</body>
+</html>
